@@ -16,7 +16,7 @@ app.use(cors({
 }));
 
 // URL de conexión de MongoDB
-const uri = 'mongodb+srv://av5328881:5kM3S2WX4yNB9U68@oleo1.swzcq.mongodb.net/?retryWrites=true&w=majority&appName=Oleo1&ssl=false';
+const uri = 'mongodb+srv://av5328881:5kM3S2WX4yNB9U68@oleo1.swzcq.mongodb.net/?retryWrites=true&w=majority&appName=Oleo1'; // Modificado el final de la URI
 const clientDB = new MongoClient(uri); // Eliminadas las opciones obsoletas
 // Inicializar el cliente de WhatsApp
 const client = new Client();
