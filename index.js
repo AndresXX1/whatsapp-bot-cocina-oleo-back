@@ -16,8 +16,9 @@ app.use(cors({
   }));
 
 // URL de conexión de MongoDB
-const uri = 'mongodb+srv://av5328881:Y3t3ngQjGTlZwD4Z@oleo.gjxj6.mongodb.net/?retryWrites=true&readPreference=primary&w=mongodb+srv';
+const uri = 'mongodb+srv://av5328881:Y3t3ngQjGTlZwD4Z@oleo.gjxj6.mongodb.net/?retryWrites=true&w=majority&appName=Oleo';
 const clientDB = new MongoClient(uri);
+
 // Inicializar el cliente de WhatsApp
 const client = new Client();
 
@@ -29,9 +30,8 @@ async function connectDB() {
     try {
         await clientDB.connect();
         console.log("Conectado a MongoDB");
-        const db = clientDB.db(); // Si especificaste una base de datos en la URI, esta línea ya obtiene esa base de datos
+        const db = clientDB.db('restaurante');
         const collection = db.collection('respuestas');
-        
 
         const respuestasIniciales = [
             { keyword: 'hola', response: '¡Hola! Bienvenido al restaurante. ¿Qué te gustaría saber sobre nuestro menú, horarios o promociones?' },
@@ -135,3 +135,4 @@ app.listen(3000, () => {
 });
 
 
+//dsadsadsad
