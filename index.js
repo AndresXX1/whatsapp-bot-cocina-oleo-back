@@ -29,7 +29,7 @@ async function connectDB() {
     try {
         await clientDB.connect();
         console.log("Conectado a MongoDB");
-        const db = clientDB.db(); // Si especificaste una base de datos en la URI, esta línea ya obtiene esa base de datos
+        const db = clientDB.db(); 
         const collection = db.collection('respuestas');
 
         const respuestasIniciales = [
@@ -43,7 +43,10 @@ async function connectDB() {
             { keyword: 'contacto', response: 'Puedes contactarnos al número +1234567890 o al correo contacto@restaurante.com.' }
         ];
 
+        // Verificar si la colección tiene elementos
         const existingDocs = await collection.find({}).toArray();
+        
+        // Solo insertar respuestas iniciales si la base de datos está vacía
         if (existingDocs.length === 0) {
             await collection.insertMany(respuestasIniciales);
             console.log("Respuestas iniciales insertadas en la base de datos");
