@@ -25,7 +25,9 @@ router.get('/api/get-responses', async (req, res) => {
     try {
         const collection = await connectDB();
         const responses = await collection.find({}).toArray();
-        res.status(200).json(responses);
+        // Filtra las respuestas que han cambiado
+        const updatedResponses = responses.filter(response => response.modifiedAt > Date.now() - 60000); // Últimas 60 segundos
+        res.status(200).json(updatedResponses);
     } catch (error) {
         console.error('Error obteniendo las respuestas:', error);
         res.status(500).send({ message: 'Error obteniendo las respuestas' });

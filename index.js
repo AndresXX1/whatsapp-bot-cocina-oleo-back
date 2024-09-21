@@ -20,7 +20,7 @@ const clientDB = new MongoClient(uri);
 const client = new Client();
 
 // Variable para almacenar el último código QR generado
-let lastQRCode = '';
+let lastQRCode = ''; 
 let collection; // Almacena la referencia de la colección para reutilizarla
 
 // Función para conectar a MongoDB y configurar la colección solo una vez
@@ -34,16 +34,7 @@ async function initializeDB() {
         // Verificar si la colección tiene documentos, si no, insertar respuestas iniciales
         const existingDocs = await collection.find({}).toArray();
         if (existingDocs.length === 0) {
-            const respuestasIniciales = [
-                { keyword: 'hola', response: '¡Hola! Bienvenido al restaurante. ¿Qué te gustaría saber sobre nuestro menú, horarios o promociones?' },
-                { keyword: 'menú', response: 'Nuestro menú incluye:\n- Hamburguesa: $10\n- Pizza: $8\n- Ensalada: $7\n- Pasta: $12' },
-                { keyword: 'horarios', response: 'Nuestro horario de atención es de Lunes a Viernes de 9:00 AM a 10:00 PM y Sábados de 10:00 AM a 11:00 PM.' },
-                { keyword: 'promociones', response: 'Promoción de la semana: 2x1 en pizzas los martes y 10% de descuento en el total de la cuenta con la palabra clave "DESC10".' },
-                { keyword: 'ingredientes hamburguesa', response: 'La hamburguesa contiene carne de res, pan, lechuga, tomate, cebolla y queso.' },
-                { keyword: 'ingredientes pizza', response: 'La pizza contiene masa, salsa de tomate, queso, y puedes elegir entre pepperoni, champiñones, pimientos y cebolla.' },
-                { keyword: 'ingredientes ensalada', response: 'La ensalada contiene lechuga, tomate, pepino, zanahoria y aderezo de tu elección.' },
-                { keyword: 'contacto', response: 'Puedes contactarnos al número +1234567890 o al correo contacto@restaurante.com.' }
-            ];
+            const respuestasIniciales = [  ]; // Tus respuestas semillas
             await collection.insertMany(respuestasIniciales);
             console.log("Respuestas iniciales insertadas en la base de datos");
         } else {
@@ -59,14 +50,8 @@ initializeDB();
 
 // Eventos de WhatsApp
 client.on('qr', (qr) => {
-    qrcode.toDataURL(qr, (err, url) => {
-        if (err) {
-            console.error('Error generando el código QR:', err);
-            return;
-        }
-        const validUrl = url.replace(/^data:image\/png;base64,/, '');
-        lastQRCode = `data:image/png;base64,${validUrl}`;
-    });
+    lastQRCode = qr; // Guardar el último código QR recibido
+    console.log('Código QR generado:', qr);
 });
 
 client.on('ready', () => {
@@ -102,6 +87,7 @@ app.get('/api/get-responses', async (req, res) => {
 app.post('/api/update-response', async (req, res) => {
     const { id, newResponse } = req.body;
     try {
+        // Asegúrate de que el id sea correcto al convertirlo en ObjectId
         await collection.updateOne({ _id: new ObjectId(id) }, { $set: { response: newResponse } });
         res.status(200).send({ message: 'Respuesta actualizada correctamente' });
     } catch (error) {
@@ -113,7 +99,14 @@ app.post('/api/update-response', async (req, res) => {
 // Ruta para obtener el código QR
 app.get('/api/get-qr', (req, res) => {
     if (lastQRCode) {
-        res.status(200).json({ qrCode: lastQRCode });
+        qrcode.toDataURL(lastQRCode, (err, url) => {
+            if (err) {
+                console.error('Error generando el código QR:', err);
+                res.status(500).send({ message: 'Error generando el código QR' });
+                return;
+            }
+            res.status(200).json({ qrCode: url });
+        });
     } else {
         res.status(404).send({ message: 'No hay QR disponible en este momento' });
     }
@@ -123,3 +116,6 @@ app.get('/api/get-qr', (req, res) => {
 app.listen(3000, () => {
     console.log('Servidor iniciado en el puerto 3000');
 });
+
+// Inicializar el cliente de WhatsApp
+client.initialize();
