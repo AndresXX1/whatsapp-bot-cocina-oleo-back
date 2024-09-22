@@ -34,7 +34,53 @@ async function initializeDB() {
         // Verificar si la colección tiene documentos, si no, insertar respuestas iniciales
         const existingDocs = await collection.find({}).toArray();
         if (existingDocs.length === 0) {
-            const respuestasIniciales = [  ]; // Tus respuestas semillas
+            const respuestasIniciales = [
+                {
+                    opcion: "inicio",
+                    mensaje: "Hola! Soy el asistente virtual de Oleo Sabores! Por favor indícame en qué te puedo ayudar hoy respondiendo con alguna de estas opciones:\n- Horarios y Ubicación\n- Reservas\n- Menú del día\n- Hacer un pedido\n- Eventos\n- Carta"
+                },
+                {
+                    opcion: "horarios",
+                    mensaje: "DIRECCIÓN: O'Higgins 5450, X5014 Córdoba. HORARIOS: lunes a lunes de 8:00 am a 1:00 am. Tenemos otros servicios que podrían interesarte."
+                },
+                {
+                    opcion: "menu del dia",
+                    mensaje: "El menú del día elaborado por nuestro Chef Nelson es Pechuga de cerdo a la pastera. ¿Te gustaría realizar un pedido o volver al menú anterior?"
+                },
+                {
+                    opcion: "realizar pedido",
+                    mensaje: "Por favor indique si le gustaría hacer una observación a los ingredientes del menú. Ej: sin chimichurri."
+                },
+                {
+                    opcion: "envio domicilio",
+                    mensaje: "Genial, los envíos a domicilio tienen un costo extra de $100, también puede retirarlo en el local. ¿Cómo deseas recibir tu pedido?\n- Envío a domicilio\n- Retiro en el local"
+                },
+                {
+                    opcion: "retirar local",
+                    mensaje: "Perfecto, puedes retirarlo en O'Higgins 5450. ¿Te gustaría hacer una observación a los ingredientes?"
+                },
+                {
+                    opcion: "direccion domicilio",
+                    mensaje: "Perfecto, ¿a qué dirección enviamos el pedido?"
+                },
+                {
+                    opcion: "reservas",
+                    mensaje: "Perfecto, las reservas pueden hacerse con una anticipación máxima de 3 días. ¿Para qué fecha y hora estás buscando?"
+                },
+                {
+                    opcion: "eventos",
+                    mensaje: "Nuestros próximos eventos son estos:\n- Evento 1\n- Evento 2\n- Evento 3. Si quieres saber más de estos eventos por favor respóndeme con el número de opción."
+                },
+                {
+                    opcion: "carta",
+                    mensaje: "Tenemos una carta muy variada. Por favor elige una sección:\n- Carnes\n- Tablas\n- Ensaladas\n- Hamburguesas y lomos\n- Tacos\n- Wraps\n- Postres\n- Bebidas"
+                },
+                {
+                    opcion: "carta bebidas",
+                    mensaje: "Aquí tienes nuestras opciones de bebidas:\n1. Coca Cola\n2. Sprite\n3. Fanta\n4. Agua mineral\n5. Agua con gas\n6. Vino tinto\n7. Cerveza artesanal\n8. Jugo natural\n9. Café expreso\n10. Té verde. ¿Te gustaría realizar el pedido o volver al menú principal?"
+                }
+            ];
+            
             await collection.insertMany(respuestasIniciales);
             console.log("Respuestas iniciales insertadas en la base de datos");
         } else {
@@ -44,6 +90,7 @@ async function initializeDB() {
         console.error('Error conectando a MongoDB:', error);
     }
 }
+
 
 // Inicializar conexión a la base de datos solo una vez al iniciar el servidor
 initializeDB();
