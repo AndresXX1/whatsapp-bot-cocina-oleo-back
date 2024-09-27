@@ -2,7 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./db');
-const apiRoutes = require('./routes/apiRoutes');
+const apiroutes = require('./routes/apiroutes');
 const bot = require('./bot');
 require('dotenv').config();
 
@@ -20,7 +20,7 @@ app.use(cors({
 connectDB();
 
 // Rutas del API
-app.use('/api', apiRoutes);
+app.use('/api', apiroutes);
 
 // Iniciar servidor
 const PORT = process.env.PORT || 3000;

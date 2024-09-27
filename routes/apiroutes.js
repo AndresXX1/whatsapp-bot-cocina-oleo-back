@@ -1,4 +1,4 @@
-// routes/apiRoutes.js
+// routes/apiroutes.js
 const express = require('express');
 const router = express.Router();
 const { getResponses, updateResponse, getQRCode } = require('../controllers');
