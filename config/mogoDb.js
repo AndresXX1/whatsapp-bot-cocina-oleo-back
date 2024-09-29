@@ -6,5 +6,5 @@ module.exports = {
     port: process.env.PORT || 3000,
     mongodbUri: process.env.MONGODB_URI || 'mongodb+srv://av5328881:6HCygxqVzrmD10AD@semilla.40ntl.mongodb.net/restaurante?retryWrites=true&w=majority&appName=Semilla',
     dialogflowProjectId: process.env.DIALOGFLOW_PROJECT_ID || 'oleo-sabores',
-    googleApplicationCredentials: path.resolve(__dirname, 'config', 'oleo-sabores.json'), // Asegúrate de que esta ruta es correcta
+    GOOGLE_APPLICATION_CREDENTIALS: path.resolve(__dirname, './config/oleo-sabores.json'),
 };

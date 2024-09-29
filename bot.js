@@ -6,20 +6,23 @@ const Reserva = require('./models/Reserva');
 const Pedido = require('./models/Pedido');
 const Evento = require('./models/Evento');
 const RespuestaBot = require('./models/RespuestaBot');
-const { setQRCode } = require('./controllers/botController'); // Asegúrate de que la ruta es correcta
-const config = require('./config/mogoDb'); // Importa la configuración
+const { setQRCode } = require('./controllers');
+require('dotenv').config();
 
 // Inicializar WhatsApp client con autenticación local para mantener la sesión
 const client = new Client({
-    authStrategy: new LocalAuth(),
+    authInfo: {
+      phoneNumber: '+1234567890',
+      session: 'YOUR_SESSION'
+    },
     puppeteer: {
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     },
     puppeteerPoolOptions: {
-        timeout: 600000 // 10 minutos en milisegundos
+      timeout: 600000 // 10 minutos en milisegundos
     }
-});
+  });
 
 let dbConnected = true;
 

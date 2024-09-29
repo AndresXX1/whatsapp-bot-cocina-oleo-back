@@ -1,21 +1,14 @@
-// dialogFlowClient.js
+// dialogflowClient.js
 const dialogflow = require('@google-cloud/dialogflow');
 const path = require('path');
-const fs = require('fs');
-const config = require('./config/mogoDb'); // Importa la configuración
-
-// Verificar que el archivo de credenciales existe
-if (!fs.existsSync(config.googleApplicationCredentials)) {
-    console.error(`El archivo de credenciales de Dialogflow no existe en la ruta: ${config.googleApplicationCredentials}`);
-    process.exit(1);
-}
+require('dotenv').config();
 
 // Configurar el cliente de Dialogflow
 const sessionClient = new dialogflow.SessionsClient({
-    keyFilename: config.googleApplicationCredentials,
+    keyFilename: path.resolve(__dirname, process.env.GOOGLE_APPLICATION_CREDENTIALS),
 });
 
-const projectId = config.dialogflowProjectId;
+const projectId = process.env.DIALOGFLOW_PROJECT_ID;
 
 const detectIntent = async (text, sessionId) => {
     const sessionPath = sessionClient.projectAgentSessionPath(projectId, sessionId);
@@ -30,19 +23,14 @@ const detectIntent = async (text, sessionId) => {
         },
     };
 
-    try {
-        const responses = await sessionClient.detectIntent(request);
-        const result = responses[0].queryResult;
+    const responses = await sessionClient.detectIntent(request);
+    const result = responses[0].queryResult;
 
-        return {
-            fulfillmentText: result.fulfillmentText,
-            intent: result.intent ? result.intent.displayName : null,
-            parameters: result.parameters.fields,
-        };
-    } catch (error) {
-        console.error('Error en detectIntent:', error);
-        throw error;
-    }
+    return {
+        fulfillmentText: result.fulfillmentText,
+        intent: result.intent ? result.intent.displayName : null,
+        parameters: result.parameters.fields,
+    };
 };
 
 module.exports = { detectIntent };
