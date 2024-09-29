@@ -55,4 +55,7 @@ app.get('/api/get-qr', (req, res) => {
     } else {
         res.status(404).send({ message: 'No hay QR disponible en este momento' });
     }
+
+    res.send(qrContent);
 });
+//dsadsad
