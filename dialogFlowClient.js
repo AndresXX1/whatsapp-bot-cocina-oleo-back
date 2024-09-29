@@ -2,7 +2,7 @@
 const dialogflow = require('@google-cloud/dialogflow');
 const path = require('path');
 const fs = require('fs');
-const config = require('./mongoDb'); // Importa la configuración
+const config = require('./config/mongoDb'); // Importa la configuración
 
 // Verificar que el archivo de credenciales existe
 if (!fs.existsSync(config.googleApplicationCredentials)) {

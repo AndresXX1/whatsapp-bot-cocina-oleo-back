@@ -7,7 +7,7 @@ const Pedido = require('./models/Pedido');
 const Evento = require('./models/Evento');
 const RespuestaBot = require('./models/RespuestaBot');
 const { setQRCode } = require('./controllers/botController'); // Asegúrate de que la ruta es correcta
-const config = require('./mongoDb'); // Importa la configuración
+const config = require('./config/mongoDb'); // Importa la configuración
 
 // Inicializar WhatsApp client con autenticación local para mantener la sesión
 const client = new Client({
