@@ -48,7 +48,7 @@ router.post('/api/update-response', async (req, res) => {
 });
 
 // Ruta para obtener el código QR
-app.get('/api/get-qr', (req, res) => {
+router.get('/api/get-qr', (req, res) => {
     if (lastQRCode) {
         console.log('QR Code:', lastQRCode); // Agrega esto para ver el contenido
         res.status(200).json({ qrCode: lastQRCode });
@@ -56,6 +56,6 @@ app.get('/api/get-qr', (req, res) => {
         res.status(404).send({ message: 'No hay QR disponible en este momento' });
     }
 
-    res.send(qrContent);
+    
 });
 //dsadsad

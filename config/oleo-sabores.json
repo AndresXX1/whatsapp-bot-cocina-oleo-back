@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "oleo-sabores",
+  "private_key_id": "a2c1e2c74c3fabd30175af4da60a6430c889f584",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCdUvAylgUKZY+I\nodQ+TE3bqDV3Ct/IfwsE0oaDI4Wr5rHem1Z6bd9bSy6B4FMZC6X7EhGgv9MKvQJ3\nDh03Z0Gpvew+VrjlQTpJ8WkYMIXbLL4QPaZuhWZWqOP7+QlSiVsumvUwX1Y91+sA\nrzVnBAZ5rkQYSAfhaRjMCpTmULXwY1n8vei4gG3PBVW1L0gITJY/fxvWjZX+jhlz\n6RTlt7QzFt7NoDOLSlbAvo1VWqMBnuK1O65t+Ovv2Ed1k9cP9AMlDr0VDshKz+eX\n65MHinDOxdsVW13amyrjYn2Ze2AhHs20Pu806iCnVLP6cGFPKEm0bRX8T7jZhFIf\n6NVWhCTDAgMBAAECggEAF1/AMjPZ0d6fAbTRfOQHWVBXiTVDZF2DvJaux4MalBy1\nZpZ7tbrnSYAVC9TRY9I4OeJIXjLB30GPwTKGormjpt2B4Q0vcVhMmbnVXHOxH4w5\nPN58AMWvG8cCAGjSusGPm5AIR8SSYqPW1YYyj/ioIaIDmfvxt8rOlVopH0L0lR9h\n6PSlaiLEH22eifWrScl8KzcC/THhSbv/KVAfdTm8X2myMC9/oxYhNA/Ifm2sOgd8\n7OwnegmfeQfvwAGi/TR0ULWELFeuNQPzghqnjK+zcIX7iRWEjNKGHVATE3QIKVaA\nt15EPWuXUb73vFA8mqSEu5XJniD4dEdFMOwPmHPQYQKBgQDZFCLB795CjCqSc1dO\n3WcF3fo2Dc2c43vwQNh4W4PmkjQI4P1nfqKLAnzpQUkaB0bOSOupw6hoPgUH4Js3\nxrr2oK0c8rBamzfFDVQbPwxXCcKAaqNQqgd0WinLdEMh5PCDcyw7Jl9k+6PJldal\nA91ZrVZjFDwLDFSIkZtgwgHGMQKBgQC5iBNR7wphreuQV3neoKLI6lyI6tO7R0Jo\nlH5bq23/LxhFOCCAUIvQawSalORtkFFt4dVU7Zd866fYz2FyR3nX+4MtMRHTtG2A\nsI1hjtQs9No7lq722/7TfLphp0EjxrFuMrEsHKN67qXcSxk5mjdrYnAVohmNiQvj\nGyplL6T5MwKBgQCsyH4x5379cRuhnfTsbQXHgbvasnnqWpcX0EV85zrBl7WbK5oH\neqBeDQjnkHNjKE+PejM52OZ+sn7GmlxxtNiz3Yhs9i6wr8NgMQ+08CYeUUJjfH2p\nguyUDAAgVNXqcJOPzWhzXEOp2TGxDnbeuYjCDFoqWry//nx6h4spJMLMwQKBgFM6\n0C/5ZFbdhseB9pIAzgYD3O8vKTzigtAXjXfiN746ilDDFRF7EL22xKH0GWVtUJpS\nrTkkPMk1jl6c6cIyfl593iLv2Gd4kYchrMsPH+/rB9ujhWoI1xBY6+PS/E3oXMBq\nzUBUuKH1XUKuDerhW+s4hb+usHfl+wcusJ4j+YYxAoGABd0Z9wnCx5ShWhVzjKhh\nrioCesoC7eff8F8bMdAxNqbHj6UT6a3cycCXq2g71JlpsiWewB/W/LW7BeexgorC\nOTd1ckeVzynTRQxLaA9y+/OJpE61kFuigZXTlYGuweducJ+8nzHvdJ3pPWgLinQm\nrJQ9YBYL5q1OdIXHKAdbFNQ=\n-----END PRIVATE KEY-----\n",
+  "client_email": "dialogflow-bot-oleo@oleo-sabores.iam.gserviceaccount.com",
+  "client_id": "115785982234202238697",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/dialogflow-bot-oleo%40oleo-sabores.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
