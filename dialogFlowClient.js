@@ -1,11 +1,11 @@
-// dialogflowClient.js
 const dialogflow = require('@google-cloud/dialogflow');
 const path = require('path');
+
 require('dotenv').config();
 
 // Configurar el cliente de Dialogflow
 const sessionClient = new dialogflow.SessionsClient({
-    keyFilename: path.resolve(__dirname, process.env.GOOGLE_APPLICATION_CREDENTIALS),
+    keyFilename: path.join(__dirname, process.env.GOOGLE_APPLICATION_CREDENTIALS),
 });
 
 const projectId = process.env.DIALOGFLOW_PROJECT_ID;
@@ -18,13 +18,13 @@ const detectIntent = async (text, sessionId) => {
         queryInput: {
             text: {
                 text: text,
-                languageCode: 'es', // Define el idioma
+                languageCode: 'es',
             },
         },
     };
 
-    const responses = await sessionClient.detectIntent(request);
-    const result = responses[0].queryResult;
+    const [response] = await sessionClient.detectIntent({session: sessionPath, queryInput: request});
+    const result = response.queryResult;
 
     return {
         fulfillmentText: result.fulfillmentText,
@@ -32,5 +32,7 @@ const detectIntent = async (text, sessionId) => {
         parameters: result.parameters.fields,
     };
 };
+
+//dsadsad
 
 module.exports = { detectIntent };
