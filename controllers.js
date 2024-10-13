@@ -9,8 +9,6 @@ const Usuario = require('./models/Usuario');
 const Propina = require('./models/Propina');
 const InventarioCocina = require('./models/InventarioCocina');
 const InventarioBebidas = require('./models/InventarioBebidas');
-const dialogflow = require('@google-cloud/dialogflow');
-const { SessionsClient } = dialogflow.v2;
 
 const dialogflow = require('@google-cloud/dialogflow');
 const { IntentsClient } = dialogflow.v2;
