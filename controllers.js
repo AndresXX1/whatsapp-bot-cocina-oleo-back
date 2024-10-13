@@ -1,6 +1,6 @@
 // controllers/botController.js
 const { ObjectId } = require('mongodb');
-const RespuestaBot = require('./models/RespuestaBot');
+const RespuestaBot = require('./models/botResponse');
 const Reserva = require('./models/Reserva');
 const Pedido = require('./models/Pedido');
 const Evento = require('./models/Evento');
