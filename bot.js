@@ -1,11 +1,12 @@
 // bot.js
+
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const { detectIntent } = require('./dialogFlowClient');
 const Reserva = require('./models/Reserva');
 const Pedido = require('./models/Pedido');
 const Evento = require('./models/Evento');
-const RespuestaBot = require('./models/RespuestaBot');
+const BotResponse = require('./models/botResponse'); // Importar el modelo BotResponse
 const { setQRCode } = require('./controllers');
 require('dotenv').config();
 
@@ -52,10 +53,21 @@ client.on('message', async (message) => {
         // Obtener el nombre del usuario si está disponible
         const nombre = dialogflowResponse.parameters.nombre?.stringValue || 'Cliente';
 
-        // Reemplazar variables en la fulfillmentText
-        let fulfillmentText = dialogflowResponse.fulfillmentText.replace('$nombre', nombre);
+        // Reemplazar variables en la fulfillmentText si existen
+        let fulfillmentText = dialogflowResponse.fulfillmentText;
+        if (fulfillmentText.includes('$nombre')) {
+            fulfillmentText = fulfillmentText.replace('$nombre', nombre);
+        }
 
-        // Enviar la respuesta de Dialogflow al usuario
+        // Buscar una respuesta personalizada en la base de datos
+        let customResponse = await BotResponse.findOne({ intent: dialogflowResponse.intent });
+        if (customResponse && customResponse.responses.length > 0) {
+            // Seleccionar una respuesta aleatoria de las disponibles
+            const randomIndex = Math.floor(Math.random() * customResponse.responses.length);
+            fulfillmentText = customResponse.responses[randomIndex].replace('$nombre', nombre);
+        }
+
+        // Enviar la respuesta al usuario
         if (fulfillmentText) {
             await message.reply(fulfillmentText);
             console.log(`Respuesta enviada al usuario: ${fulfillmentText}`);
