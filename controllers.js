@@ -16,18 +16,26 @@ require('dotenv').config();
 
 async function getDialogflowIntents() {
     try {
-        // Usar las credenciales de la variable de entorno
+        console.log('Intentando parsear credenciales...');
         const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
-
-        // Configurar el cliente con las credenciales
+        
+        console.log('Credenciales parseadas correctamente');
+        
         const intentsClient = new IntentsClient({
             projectId: credentials.project_id,
             key: credentials
         });
 
+        console.log('Cliente de intents creado');
+
         const parent = intentsClient.projectAgentPath(credentials.project_id);
         const request = { parent };
+        
+        console.log('Solicitando lista de intents...');
         const [response] = await intentsClient.listIntents(request);
+        
+        console.log('Respuesta recibida:', response);
+
         return response.intents.map(intent => ({
             id: intent.name.split('/').pop(),
             displayName: intent.displayName,
