@@ -9,6 +9,42 @@ const Usuario = require('./models/Usuario');
 const Propina = require('./models/Propina');
 const InventarioCocina = require('./models/InventarioCocina');
 const InventarioBebidas = require('./models/InventarioBebidas');
+const dialogflow = require('@google-cloud/dialogflow');
+const { SessionsClient } = dialogflow.v2;
+
+const sessionsClient = new SessionsClient({
+    projectId: process.env.DIALOGFLOW_PROJECT_ID,
+});
+
+async function getDialogflowIntents() {
+    const intentsClient = new dialogflow.IntentsClient();
+    const parent = intentsClient.projectAgentPath(process.env.DIALOGFLOW_PROJECT_ID);
+    const request = { parent };
+    const [response] = await intentsClient.listIntents(request);
+    return response.intents.map(intent => ({
+        id: intent.name.split('/').pop(),
+        displayName: intent.displayName,
+        trainingPhrases: intent.trainingPhrases.map(phrase => phrase.parts[0].text),
+        messageTexts: intent.messages && intent.messages[0] ? intent.messages[0].text.text : []
+    }));
+}
+
+async function updateDialogflowIntent(intentId, displayName, trainingPhrases, messageTexts) {
+    const intentsClient = new dialogflow.IntentsClient();
+    const intentPath = intentsClient.intentPath(process.env.DIALOGFLOW_PROJECT_ID, intentId);
+    const intent = {
+        displayName,
+        trainingPhrases: trainingPhrases.map(phrase => ({ parts: [{ text: phrase }] })),
+        messages: [{
+            text: {
+                text: messageTexts
+            }
+        }]
+    };
+
+    const request = { intent, intentPath };
+    await intentsClient.updateIntent(request);
+}
 
 // Obtener todas las respuestas
 const getResponses = async (req, res) => {
