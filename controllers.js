@@ -12,20 +12,33 @@ const InventarioBebidas = require('./models/InventarioBebidas');
 
 const dialogflow = require('@google-cloud/dialogflow');
 const { IntentsClient } = dialogflow.v2;
+require('dotenv').config();
 
 async function getDialogflowIntents() {
-    const intentsClient = new IntentsClient();
-    const parent = intentsClient.projectAgentPath(process.env.DIALOGFLOW_PROJECT_ID);
-    const request = { parent };
-    const [response] = await intentsClient.listIntents(request);
-    return response.intents.map(intent => ({
-        id: intent.name.split('/').pop(),
-        displayName: intent.displayName,
-        trainingPhrases: intent.trainingPhrases.map(phrase => phrase.parts[0].text),
-        messageTexts: intent.messages && intent.messages[0] ? intent.messages[0].text.text : []
-    }));
-}
+    try {
+        // Usar las credenciales de la variable de entorno
+        const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
 
+        // Configurar el cliente con las credenciales
+        const intentsClient = new IntentsClient({
+            projectId: credentials.project_id,
+            key: credentials
+        });
+
+        const parent = intentsClient.projectAgentPath(credentials.project_id);
+        const request = { parent };
+        const [response] = await intentsClient.listIntents(request);
+        return response.intents.map(intent => ({
+            id: intent.name.split('/').pop(),
+            displayName: intent.displayName,
+            trainingPhrases: intent.trainingPhrases.map(phrase => phrase.parts[0].text),
+            messageTexts: intent.messages && intent.messages[0] ? intent.messages[0].text.text : []
+        }));
+    } catch (error) {
+        console.error('Error obteniendo intents de Dialogflow:', error);
+        throw error;
+    }
+}
 
 
 
