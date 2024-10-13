@@ -1,4 +1,4 @@
-// models/BotResponse.js
+// models/botResponse.js
 
 const mongoose = require('mongoose');
 
