@@ -80,9 +80,10 @@ client.on('message', async (message) => {
                 const fechaReserva = dialogflowResponse.parameters.fecha_reserva?.stringValue;
                 const horaReserva = dialogflowResponse.parameters.hora_reserva?.stringValue;
                 const numeroPersonas = dialogflowResponse.parameters.numero_personas?.numberValue;
+                const comentarioReserva = dialogflowResponse.parameters.comentario_reserva?.stringValue || '';
 
                 if (!fechaReserva || !horaReserva || !numeroPersonas) {
-                    await message.reply('Por favor, proporciona todos los detalles para la reserva (fecha, hora y número de personas).');
+                    await message.reply('Por favor, proporciona todos los detalles para la reserva (nombre, fecha, hora y número de personas).');
                     break;
                 }
 
@@ -92,7 +93,7 @@ client.on('message', async (message) => {
                     fecha: new Date(fechaReserva),
                     hora: horaReserva,
                     numeroPersonas: numeroPersonas,
-                    comentario: dialogflowResponse.parameters.comentario_reserva?.stringValue || '',
+                    comentario: comentarioReserva,
                     confirmada: false, // Confirmar más adelante
                 });
 

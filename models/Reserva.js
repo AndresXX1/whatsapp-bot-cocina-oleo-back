@@ -5,7 +5,7 @@ const reservaSchema = new mongoose.Schema({
     fecha: { type: Date, required: true },
     hora: { type: String, required: true },
     numeroPersonas: { type: Number, required: true },
-    comentario: { type: String },
+    comentario: { type: String, default: '' },
     confirmada: { type: Boolean, default: false },
 }, { timestamps: true });
 
