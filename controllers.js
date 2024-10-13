@@ -10,46 +10,6 @@ const Propina = require('./models/Propina');
 const InventarioCocina = require('./models/InventarioCocina');
 const InventarioBebidas = require('./models/InventarioBebidas');
 
-const dialogflow = require('@google-cloud/dialogflow');
-const { IntentsClient } = dialogflow.v2;
-require('dotenv').config();
-
-async function getDialogflowIntents() {
-    try {
-        console.log('Intentando parsear credenciales...');
-        const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
-        
-        console.log('Credenciales parseadas correctamente');
-        
-        const intentsClient = new IntentsClient({
-            projectId: credentials.project_id,
-            key: credentials
-        });
-
-        console.log('Cliente de intents creado');
-
-        const parent = intentsClient.projectAgentPath(credentials.project_id);
-        const request = { parent };
-        
-        console.log('Solicitando lista de intents...');
-        const [response] = await intentsClient.listIntents(request);
-        
-        console.log('Respuesta recibida:', response);
-
-        return response.intents.map(intent => ({
-            id: intent.name.split('/').pop(),
-            displayName: intent.displayName,
-            trainingPhrases: intent.trainingPhrases.map(phrase => phrase.parts[0].text),
-            messageTexts: intent.messages && intent.messages[0] ? intent.messages[0].text.text : []
-        }));
-    } catch (error) {
-        console.error('Error obteniendo intents de Dialogflow:', error);
-        throw error;
-    }
-}
-
-
-
 // Obtener todas las respuestas
 const getResponses = async (req, res) => {
     try {
@@ -93,5 +53,4 @@ module.exports = {
     updateResponse,
     getQRCode,
     setQRCode, // Para ser usado en bot.js
-    getDialogflowIntents
 };
