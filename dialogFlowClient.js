@@ -1,18 +1,36 @@
-// dialogflowclient.js
-
 const dialogflow = require('@google-cloud/dialogflow');
-const path = require('path');
-
 require('dotenv').config();
 
-// Configurar el cliente de Dialogflow
+// Verificar que la variable de entorno esté definida
+if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    throw new Error('La variable de entorno GOOGLE_APPLICATION_CREDENTIALS_JSON no está definida.');
+}
+
+// Parsear las credenciales desde la variable de entorno
+let credentials;
+try {
+    credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+} catch (error) {
+    console.error('Error al parsear GOOGLE_APPLICATION_CREDENTIALS_JSON:', error);
+    throw error;
+}
+
+// Configurar el cliente de Dialogflow con las credenciales
 const sessionClient = new dialogflow.SessionsClient({
-    keyFilename: path.join(__dirname, process.env.GOOGLE_APPLICATION_CREDENTIALS),
+    credentials: {
+        client_email: credentials.client_email,
+        private_key: credentials.private_key,
+    },
+    projectId: process.env.DIALOGFLOW_PROJECT_ID,
 });
 
 const projectId = process.env.DIALOGFLOW_PROJECT_ID;
 
 const detectIntent = async (text, sessionId) => {
+    if (!text || typeof text !== 'string') {
+        throw new Error('El mensaje del usuario está vacío o no es una cadena.');
+    }
+
     const sessionPath = sessionClient.projectAgentSessionPath(projectId, sessionId);
 
     const request = {
@@ -20,7 +38,7 @@ const detectIntent = async (text, sessionId) => {
         queryInput: {
             text: {
                 text: text,
-                languageCode: 'es', // Considera usar 'es-ES' para español de España o 'es-MX' para México
+                languageCode: 'es-ES', // Ajusta según tu necesidad
             },
         },
     };
