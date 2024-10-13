@@ -12,12 +12,11 @@ const InventarioBebidas = require('./models/InventarioBebidas');
 const dialogflow = require('@google-cloud/dialogflow');
 const { SessionsClient } = dialogflow.v2;
 
-const sessionsClient = new SessionsClient({
-    projectId: process.env.DIALOGFLOW_PROJECT_ID,
-});
+const dialogflow = require('@google-cloud/dialogflow');
+const { IntentsClient } = dialogflow.v2;
 
 async function getDialogflowIntents() {
-    const intentsClient = new dialogflow.IntentsClient();
+    const intentsClient = new IntentsClient();
     const parent = intentsClient.projectAgentPath(process.env.DIALOGFLOW_PROJECT_ID);
     const request = { parent };
     const [response] = await intentsClient.listIntents(request);
@@ -29,22 +28,8 @@ async function getDialogflowIntents() {
     }));
 }
 
-async function updateDialogflowIntent(intentId, displayName, trainingPhrases, messageTexts) {
-    const intentsClient = new dialogflow.IntentsClient();
-    const intentPath = intentsClient.intentPath(process.env.DIALOGFLOW_PROJECT_ID, intentId);
-    const intent = {
-        displayName,
-        trainingPhrases: trainingPhrases.map(phrase => ({ parts: [{ text: phrase }] })),
-        messages: [{
-            text: {
-                text: messageTexts
-            }
-        }]
-    };
 
-    const request = { intent, intentPath };
-    await intentsClient.updateIntent(request);
-}
+
 
 // Obtener todas las respuestas
 const getResponses = async (req, res) => {
@@ -89,4 +74,5 @@ module.exports = {
     updateResponse,
     getQRCode,
     setQRCode, // Para ser usado en bot.js
+    getDialogflowIntents
 };
