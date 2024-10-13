@@ -106,4 +106,46 @@ router.delete('/bot-responses/:intent', async (req, res) => {
     }
 });
 
+router.post('/update-intent', async (req, res) => {
+    const { intentId, newResponse } = req.body; // Recibe el ID del intent y la nueva respuesta
+    const projectId = process.env.DIALOGFLOW_PROJECT_ID;
+
+    try {
+        // Recupera el intent existente
+        const request = {
+            name: client.intentPath(projectId, intentId),
+        };
+
+        const [intent] = await client.getIntent(request);
+
+        // Asegúrate de que el intent tiene al menos una respuesta
+        if (!intent.responses || intent.responses.length === 0) {
+            return res.status(400).json({ message: 'El intent no tiene respuestas para actualizar' });
+        }
+
+        // Modifica la respuesta del intent
+        intent.responses[0].messages = [
+            {
+                text: {
+                    text: [newResponse],
+                },
+            },
+        ];
+
+        // Actualiza el intent en Dialogflow
+        const updateRequest = {
+            intent: intent,
+            updateMask: {
+                paths: ['messages'],
+            },
+        };
+
+        const [updatedIntent] = await client.updateIntent(updateRequest);
+        res.status(200).json({ success: true, intent: updatedIntent });
+    } catch (error) {
+        console.error('Error updating intent:', error);
+        res.status(500).send({ message: 'Error updating intent', error });
+    }
+});
+
 module.exports = router;
