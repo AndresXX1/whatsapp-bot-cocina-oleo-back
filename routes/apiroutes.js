@@ -75,4 +75,29 @@ router.delete('/bot-responses/:intent', async (req, res) => {
     }
 });
 
+// Obtener todos los intents de Dialogflow
+router.get('/dialogflow/intents', async (req, res) => {
+    try {
+        const intents = await getDialogflowIntents(); // Implementar esta función
+        res.json(intents);
+    } catch (error) {
+        console.error('Error obteniendo intents de Dialogflow:', error);
+        res.status(500).json({ message: 'Error obteniendo intents de Dialogflow' });
+    }
+});
+
+// Actualizar un intent en Dialogflow
+router.put('/dialogflow/intents/:intentId', async (req, res) => {
+    const { intentId } = req.params;
+    const { displayName, trainingPhrases, messageTexts } = req.body;
+
+    try {
+        await updateDialogflowIntent(intentId, displayName, trainingPhrases, messageTexts); // Implementar esta función
+        res.status(200).json({ message: 'Intent actualizado correctamente' });
+    } catch (error) {
+        console.error('Error actualizando intent en Dialogflow:', error);
+        res.status(500).json({ message: 'Error actualizando intent en Dialogflow' });
+    }
+});
+
 module.exports = router;
