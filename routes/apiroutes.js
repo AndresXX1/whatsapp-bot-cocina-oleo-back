@@ -3,9 +3,6 @@ const express = require('express');
 const router = express.Router();
 const { getResponses, updateResponse, getQRCode } = require('../controllers');
 const BotResponse = require('../models/botResponse');
-const dialogflow = require('@google-cloud/dialogflow');
-const { projectId } = require('../config'); // Asegúrate de tener el projectId en tu configuración
-const client = new dialogflow.IntentsClient();
 
 // Ruta para obtener las respuestas
 router.get('/get-responses', getResponses);
@@ -16,34 +13,6 @@ router.post('/update-response', updateResponse);
 // Ruta para obtener el código QR
 router.get('/get-qr', getQRCode);
 
-// Ruta para obtener todos los intents de Dialogflow y guardarlos en MongoDB
-router.post('/save-intents', async (req, res) => {
-    try {
-        const projectPath = client.projectPath(projectId);
-        const [intents] = await client.listIntents({ parent: projectPath });
-
-        const botResponses = intents.map(intent => ({
-            intent: intent.displayName,
-            responses: intent.responses.map(response => response.fulfillmentText || 'No response provided')
-        }));
-
-        // Insertar o actualizar cada intent en MongoDB
-        for (const botResponse of botResponses) {
-            await BotResponse.findOneAndUpdate(
-                { intent: botResponse.intent },
-                { responses: botResponse.responses },
-                { upsert: true, new: true }
-            );
-        }
-
-        res.status(200).json({ message: 'Intents guardados correctamente', botResponses });
-    } catch (error) {
-        console.error('Error guardando intents:', error);
-        res.status(500).json({ message: 'Error guardando intents', error });
-    }
-});
-
-// Ruta para obtener todas las respuestas
 router.get('/bot-responses', async (req, res) => {
     try {
         const responses = await BotResponse.find();
@@ -103,48 +72,6 @@ router.delete('/bot-responses/:intent', async (req, res) => {
     } catch (error) {
         console.error('Error eliminando la respuesta del bot:', error);
         res.status(500).json({ message: 'Error eliminando la respuesta del bot' });
-    }
-});
-
-router.post('/update-intent', async (req, res) => {
-    const { intentId, newResponse } = req.body; // Recibe el ID del intent y la nueva respuesta
-    const projectId = process.env.DIALOGFLOW_PROJECT_ID;
-
-    try {
-        // Recupera el intent existente
-        const request = {
-            name: client.intentPath(projectId, intentId),
-        };
-
-        const [intent] = await client.getIntent(request);
-
-        // Asegúrate de que el intent tiene al menos una respuesta
-        if (!intent.responses || intent.responses.length === 0) {
-            return res.status(400).json({ message: 'El intent no tiene respuestas para actualizar' });
-        }
-
-        // Modifica la respuesta del intent
-        intent.responses[0].messages = [
-            {
-                text: {
-                    text: [newResponse],
-                },
-            },
-        ];
-
-        // Actualiza el intent en Dialogflow
-        const updateRequest = {
-            intent: intent,
-            updateMask: {
-                paths: ['messages'],
-            },
-        };
-
-        const [updatedIntent] = await client.updateIntent(updateRequest);
-        res.status(200).json({ success: true, intent: updatedIntent });
-    } catch (error) {
-        console.error('Error updating intent:', error);
-        res.status(500).send({ message: 'Error updating intent', error });
     }
 });
 
