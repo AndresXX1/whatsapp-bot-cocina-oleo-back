@@ -1,8 +1,9 @@
 // routes/apiroutes.js
 const express = require('express');
 const router = express.Router();
-const { getResponses, updateResponse, getQRCode } = require('../controllers');
+const { getResponses, updateResponse, getQRCode, getDialogflowIntents } = require('../controllers');
 const BotResponse = require('../models/botResponse');
+
 
 // Ruta para obtener las respuestas
 router.get('/get-responses', getResponses);
@@ -78,7 +79,9 @@ router.delete('/bot-responses/:intent', async (req, res) => {
 // Obtener todos los intents de Dialogflow
 router.get('/dialogflow/intents', async (req, res) => {
     try {
-        const intents = await getDialogflowIntents(); // Implementar esta función
+        console.log('Intentando obtener intents de Dialogflow...');
+        const intents = await getDialogflowIntents();
+        console.log('Intents obtenidos:', intents);
         res.json(intents);
     } catch (error) {
         console.error('Error obteniendo intents de Dialogflow:', error);
