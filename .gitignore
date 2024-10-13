@@ -1,3 +1,8 @@
-/node_modules
+# Dependencias
+node_modules/
 
-/config/dialogflow.jsonconfig/oleo-sabores.json
+# Archivos de entorno
+.env
+
+# Credenciales de Google Cloud
+/config/oleo-sabores-12-10.json
