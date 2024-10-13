@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { MongoClient, ObjectId } = require('mongodb');
+const dialogflow = require('@google-cloud/dialogflow');
+const client = new dialogflow.IntentsClient(); // Crea un cliente de intents
 
 // URL de conexión de MongoDB
 const uri = 'mongodb+srv://av5328881:Y3t3ngQjGTlZwD4Z@oleo.gjxj6.mongodb.net/?retryWrites=true&w=majority&appName=Oleo';
@@ -19,6 +21,37 @@ async function connectDB() {
         console.error('Error conectando a MongoDB:', error);
     }
 }
+
+app.post('/api/update-intent', async (req, res) => {
+    const { intentId, newResponse } = req.body; // Recibe el ID del intent y la nueva respuesta
+
+    try {
+        // Recupera el intent existente
+        const request = {
+            name: client.intentPath(projectId, intentId),
+        };
+
+        const [intent] = await client.getIntent(request);
+        
+        // Modifica la respuesta del intent
+        intent.responses[0].text.text[0] = newResponse;
+
+        // Actualiza el intent en Dialogflow
+        const updateRequest = {
+            intent: intent,
+            updateMask: {
+                paths: ['responses'],
+            },
+        };
+
+        const [updatedIntent] = await client.updateIntent(updateRequest);
+        res.status(200).json({ success: true, intent: updatedIntent });
+    } catch (error) {
+        console.error('Error updating intent:', error);
+        res.status(500).send('Error updating intent');
+    }
+});
+
 
 // Ruta para obtener las respuestas
 router.get('/api/get-responses', async (req, res) => {
