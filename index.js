@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./db');
 const apiroutes = require('./routes/apiroutes');
-const bot = require('./bot');
+const bot = require('./bot'); // Asegúrate de que bot.js se ejecuta al ser importado
 require('dotenv').config();
 
 const app = express();
@@ -18,6 +18,8 @@ app.use(cors({
 
 // Conectar a la base de datos
 connectDB().then(() => {
+    console.log('Conectado a MongoDB');
+
     // Rutas del API
     app.use('/api', apiroutes);
 
@@ -28,8 +30,7 @@ connectDB().then(() => {
     });
 
     // Iniciar el bot de WhatsApp
-    bot.initialize();
-
+    // El bot ya se inicializa en bot.js, así que no es necesario llamarlo aquí
 }).catch(err => {
     console.error('Error al conectar a la base de datos:', err);
     process.exit(1);
