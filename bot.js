@@ -76,14 +76,6 @@ client.on('message', async (message) => {
             fulfillmentText = fulfillmentText.replace('$nombre', nombre);
         }
 
-        // Buscar una respuesta personalizada en la base de datos
-        let customResponse = await BotResponse.findOne({ intent: dialogflowResponse.intent });
-        if (customResponse && customResponse.responses.length > 0) {
-            // Seleccionar una respuesta aleatoria de las disponibles
-            const randomIndex = Math.floor(Math.random() * customResponse.responses.length);
-            fulfillmentText = customResponse.responses[randomIndex].replace('$nombre', nombre);
-        }
-
         // Enviar la respuesta al usuario
         if (fulfillmentText) {
             await message.reply(fulfillmentText);
@@ -103,47 +95,41 @@ client.on('message', async (message) => {
 
                 // Validaciones adicionales
                 if (!fechaReservaStr || !horaReserva || !numeroPersonas) {
-                    console.log('Faltan detalles para la reserva, se espera que Dialogflow maneje las solicitudes de información.');
+                    await message.reply('Faltan detalles para la reserva. Por favor, proporciona la fecha, hora y número de personas.');
                     break; // Salimos del switch para evitar responder con mensajes adicionales
                 }
 
-                // Convertir la fecha correctamente
-                let fechaReserva;
-
-                if (moment(fechaReservaStr, 'DD-MM-YYYY', true).isValid()) {
-                    fechaReserva = moment(fechaReservaStr, 'DD-MM-YYYY').toDate();
-                } else if (moment(fechaReservaStr, 'DD/MM/YYYY', true).isValid()) {
-                    fechaReserva = moment(fechaReservaStr, 'DD/MM/YYYY').toDate();
-                } else if (moment(fechaReservaStr, 'DD/MM', true).isValid()) {
-                    // Asignar el año actual si no se proporciona
-                    const currentYear = new Date().getFullYear();
-                    fechaReserva = moment(fechaReservaStr + '/' + currentYear, 'DD/MM/YYYY').toDate();
-                } else {
-                    await message.reply('La fecha proporcionada no es válida. Por favor, usa el formato DD-MM-YYYY o DD/MM.');
+                // Convertir la fecha y hora correctamente
+                let fechaReserva = moment(fechaReservaStr, 'YYYY-MM-DD', true).toDate();
+                if (!fechaReserva || !moment(fechaReserva).isValid()) {
+                    await message.reply('La fecha proporcionada no es válida. Por favor, usa el formato YYYY-MM-DD.');
                     break;
                 }
+
+                // Convertir hora a formato de 24 horas
+                const horaMoment = moment(horaReserva, 'HH:mm', true);
+                if (!horaMoment.isValid()) {
+                    await message.reply('La hora proporcionada no es válida. Por favor, usa el formato HH:mm.');
+                    break;
+                }
+
+                const fechaCompletaReserva = moment(fechaReserva).set({
+                    hour: horaMoment.hour(),
+                    minute: horaMoment.minute(),
+                }).toDate();
+
+                console.log('Fecha y hora de reserva completa:', fechaCompletaReserva);
 
                 // Validaciones de la fecha
                 const today = moment().startOf('day');
-                const reservaMoment = moment(fechaReserva);
 
-                if (!reservaMoment.isValid()) {
-                    await message.reply('La fecha proporcionada no es válida. Por favor, usa el formato DD-MM-YYYY o DD/MM.');
-                    break;
-                }
-
-                if (reservaMoment.isSameOrBefore(today, 'day')) {
+                if (moment(fechaCompletaReserva).isSameOrBefore(today, 'day')) {
                     await message.reply('La fecha de reserva debe ser a partir de mañana.');
                     break;
                 }
 
-                if (reservaMoment.diff(today, 'days') > 20) {
-                    await message.reply('Las reservas solo pueden realizarse hasta 20 días en el futuro.');
-                    break;
-                }
-
                 // Validar que la cantidad máxima de personas por día no supere 50
-                const reservasDia = await Reserva.find({ fecha: reservaMoment.startOf('day').toDate() });
+                const reservasDia = await Reserva.find({ fecha: moment(fechaCompletaReserva).startOf('day').toDate() });
                 const totalPersonasDia = reservasDia.reduce((total, reserva) => total + reserva.numeroPersonas, 0);
 
                 if ((totalPersonasDia + numeroPersonas) > 50) {
@@ -154,7 +140,7 @@ client.on('message', async (message) => {
                 // Crear una reserva con los parámetros proporcionados
                 const reserva = new Reserva({
                     nombre: nombre,
-                    fecha: reservaMoment.toDate(),
+                    fecha: fechaCompletaReserva,
                     hora: horaReserva,
                     numeroPersonas: numeroPersonas,
                     comentario: comentarioReserva,
@@ -174,18 +160,6 @@ client.on('message', async (message) => {
 
                 break;
 
-            case 'HacerPedido':
-                // ... (mantén el código existente)
-                break;
-
-            case 'ConsultarEventos':
-                // ... (mantén el código existente)
-                break;
-
-            case 'DetalleEvento':
-                // ... (mantén el código existente)
-                break;
-
             // ... otros casos para intents
 
             default:
@@ -199,7 +173,6 @@ client.on('message', async (message) => {
         await message.reply('Lo siento, ocurrió un error al procesar tu solicitud.');
     }
 });
-
 // Inicializar el cliente de WhatsApp
 client.initialize();
 
