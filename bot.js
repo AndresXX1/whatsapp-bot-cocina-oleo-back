@@ -83,7 +83,7 @@ client.on('message', async (message) => {
                 const comentarioReserva = dialogflowResponse.parameters.comentario_reserva?.stringValue || '';
 
                 if (!fechaReserva || !horaReserva || !numeroPersonas) {
-                    await message.reply('Por favor, proporciona todos los detalles para la reserva (nombre, fecha, hora y número de personas).');
+                   
                     break;
                 }
 
