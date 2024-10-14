@@ -45,6 +45,12 @@ const getParamValue = (param) => {
     if (!param) return undefined;
     if (param.stringValue) return param.stringValue;
     if (param.numberValue) return param.numberValue;
+    if (param.structValue && param.structValue.fields) {
+        if (param.structValue.fields.startDate) {
+            return param.structValue.fields.startDate.stringValue; // Extrae startDate para la reserva
+        }
+        // Puedes agregar más lógica aquí si es necesario
+    }
     if (param.listValue && param.listValue.values && param.listValue.values.length > 0) {
         const firstValue = param.listValue.values[0];
         if (firstValue.stringValue) return firstValue.stringValue;
@@ -53,7 +59,7 @@ const getParamValue = (param) => {
     return undefined;
 };
 
-// Evento Message
+
 // Evento Message
 client.on('message', async (message) => {
     if (message.fromMe) return; // Ignorar mensajes enviados por el bot
@@ -77,6 +83,14 @@ client.on('message', async (message) => {
             fulfillmentText = fulfillmentText.replace('$nombre', nombre);
         }
 
+        // Buscar una respuesta personalizada en la base de datos
+        let customResponse = await BotResponse.findOne({ intent: dialogflowResponse.intent });
+        if (customResponse && customResponse.responses.length > 0) {
+            // Seleccionar una respuesta aleatoria de las disponibles
+            const randomIndex = Math.floor(Math.random() * customResponse.responses.length);
+            fulfillmentText = customResponse.responses[randomIndex].replace('$nombre', nombre);
+        }
+
         // Enviar la respuesta al usuario
         if (fulfillmentText) {
             await message.reply(fulfillmentText);
@@ -87,59 +101,49 @@ client.on('message', async (message) => {
         switch (dialogflowResponse.intent) {
             case 'ReservarMesa':
                 // Extraer los parámetros usando la función auxiliar
-                const fechaReservaStr = getParamValue(dialogflowResponse.parameters.fecha_reserva);
+                const fechaReservaStr = getParamValue(dialogflowResponse.parameters.fecha_reserva); // Usar startDate
                 const horaReserva = getParamValue(dialogflowResponse.parameters.hora_reserva);
                 const numeroPersonas = getParamValue(dialogflowResponse.parameters.numero_personas);
                 const comentarioReserva = getParamValue(dialogflowResponse.parameters.comentario_reserva) || '';
-
+            
                 console.log('Parámetros de reserva:', { nombre, fechaReservaStr, horaReserva, numeroPersonas, comentarioReserva });
-
-                // Validaciones adicionales
+            
                 if (!fechaReservaStr || !horaReserva || !numeroPersonas) {
-                    console.log('Faltan detalles para la reserva.');
-                    break; // Salimos del switch sin enviar mensaje adicional
-                }
-
-                // Convertir la fecha correctamente
-                let fechaReserva;
-
-                if (moment(fechaReservaStr, 'DD-MM-YYYY', true).isValid()) {
-                    fechaReserva = moment(fechaReservaStr, 'DD-MM-YYYY').toDate();
-                } else if (moment(fechaReservaStr, 'DD/MM/YYYY', true).isValid()) {
-                    fechaReserva = moment(fechaReservaStr, 'DD/MM/YYYY').toDate();
-                } else {
-                    await message.reply('La fecha proporcionada no es válida. Por favor, usa el formato DD-MM-YYYY o DD/MM.');
+                    console.log('Faltan detalles para la reserva, se espera que Dialogflow maneje las solicitudes de información.');
                     break;
                 }
-
+            
+                // Convertir la fecha correctamente
+                let fechaReserva = moment(fechaReservaStr).toDate(); // Dialogflow ya proporciona una fecha en formato correcto
+            
                 // Validaciones de la fecha
                 const today = moment().startOf('day');
                 const reservaMoment = moment(fechaReserva);
-
+            
                 if (!reservaMoment.isValid()) {
                     await message.reply('La fecha proporcionada no es válida. Por favor, usa el formato DD-MM-YYYY o DD/MM.');
                     break;
                 }
-
+            
                 if (reservaMoment.isSameOrBefore(today, 'day')) {
                     await message.reply('La fecha de reserva debe ser a partir de mañana.');
                     break;
                 }
-
+            
                 if (reservaMoment.diff(today, 'days') > 20) {
                     await message.reply('Las reservas solo pueden realizarse hasta 20 días en el futuro.');
                     break;
                 }
-
+            
                 // Validar que la cantidad máxima de personas por día no supere 50
                 const reservasDia = await Reserva.find({ fecha: reservaMoment.startOf('day').toDate() });
                 const totalPersonasDia = reservasDia.reduce((total, reserva) => total + reserva.numeroPersonas, 0);
-
+            
                 if ((totalPersonasDia + numeroPersonas) > 50) {
                     await message.reply('Lo siento, ya no hay disponibilidad para esa fecha. Por favor, elige otra fecha.');
                     break;
                 }
-
+            
                 // Crear una reserva con los parámetros proporcionados
                 const reserva = new Reserva({
                     nombre: nombre,
@@ -149,9 +153,9 @@ client.on('message', async (message) => {
                     comentario: comentarioReserva,
                     confirmada: false, // Confirmar más adelante
                 });
-
+            
                 console.log('Creando reserva:', reserva);
-
+            
                 try {
                     await reserva.save();
                     console.log('Reserva guardada exitosamente:', reserva);
@@ -160,7 +164,7 @@ client.on('message', async (message) => {
                     console.error('Error al guardar reserva:', error);
                     await message.reply('Lo siento, ocurrió un error al guardar tu reserva. Por favor, intenta nuevamente más tarde.');
                 }
-
+            
                 break;
 
             case 'HacerPedido':
