@@ -1,12 +1,10 @@
-// bot.js
-
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const { detectIntent } = require('./dialogFlowClient');
 const Reserva = require('./models/Reserva');
 const Pedido = require('./models/Pedido');
 const Evento = require('./models/Evento');
-const BotResponse = require('./models/botResponse'); // Importar el modelo BotResponse
+const BotResponse = require('./models/botResponse');
 const { setQRCode } = require('./controllers');
 require('dotenv').config();
 
@@ -21,8 +19,6 @@ const client = new Client({
         timeout: 600000 // 10 minutos en milisegundos
     }
 });
-
-let dbConnected = true;
 
 // Evento QR
 client.on('qr', (qr) => {
