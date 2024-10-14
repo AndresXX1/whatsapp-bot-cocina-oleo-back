@@ -103,7 +103,7 @@ client.on('message', async (message) => {
                 try {
                     await reserva.save();
                     console.log('Reserva guardada exitosamente:', reserva);
-                    await message.reply(`¡Gracias, ${nombre}! Tu reserva para ${numeroPersonas} personas ha sido creada exitosamente.`);
+                    await message.reply(`¡Gracias, ${nombre}! Tu reserva para ${numeroPersonas} el dia ${fecha} a las ${hora} personas ha sido creada exitosamente.`);
                 } catch (error) {
                     console.error('Error al guardar reserva:', error);
                     await message.reply('Lo siento, ocurrió un error al guardar tu reserva. Por favor, intenta nuevamente más tarde.');
