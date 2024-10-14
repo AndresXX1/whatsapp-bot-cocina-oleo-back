@@ -7,7 +7,6 @@ const BotResponse = require('./models/botResponse'); // Importar el modelo BotRe
 const { setQRCode } = require('./controllers');
 const moment = require('moment'); // Asegúrate de tener moment instalado
 const mongoose = require('mongoose'); // Importar mongoose para logs
-const moment = require('moment');
 require('dotenv').config();
 
 // Inicializar WhatsApp client con autenticación local para mantener la sesión
