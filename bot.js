@@ -45,12 +45,6 @@ const getParamValue = (param) => {
     if (!param) return undefined;
     if (param.stringValue) return param.stringValue;
     if (param.numberValue) return param.numberValue;
-    if (param.structValue && param.structValue.fields) {
-        if (param.structValue.fields.startDate) {
-            return param.structValue.fields.startDate.stringValue; // Extrae startDate para la reserva
-        }
-        // Puedes agregar más lógica aquí si es necesario
-    }
     if (param.listValue && param.listValue.values && param.listValue.values.length > 0) {
         const firstValue = param.listValue.values[0];
         if (firstValue.stringValue) return firstValue.stringValue;
@@ -58,7 +52,6 @@ const getParamValue = (param) => {
     }
     return undefined;
 };
-
 
 // Evento Message
 client.on('message', async (message) => {
