@@ -73,59 +73,43 @@ client.on('message', async (message) => {
 
         // Manejar acciones basadas en la intención
         switch (dialogflowResponse.intent) {
-           case 'ReservarMesa':
-    // Validar la existencia de todos los parámetros necesarios
-    const fechaReservaStr = dialogflowResponse.parameters.fecha_reserva?.stringValue;
-    const horaReserva = dialogflowResponse.parameters.hora_reserva?.stringValue;
-    const numeroPersonas = dialogflowResponse.parameters.numero_personas?.numberValue;
-    const comentarioReserva = dialogflowResponse.parameters.comentario_reserva?.stringValue || '';
+            case 'ReservarMesa':
+                // Validar la existencia de todos los parámetros necesarios
+                const fechaReservaStr = dialogflowResponse.parameters.fecha_reserva?.stringValue;
+                const horaReserva = dialogflowResponse.parameters.hora_reserva?.stringValue;
+                const numeroPersonas = dialogflowResponse.parameters.numero_personas?.numberValue;
+                const comentarioReserva = dialogflowResponse.parameters.comentario_reserva?.stringValue || '';
 
-    console.log('Parámetros de reserva:', { nombre, fechaReservaStr, horaReserva, numeroPersonas, comentarioReserva });
+                console.log('Parámetros de reserva:', { nombre, fechaReservaStr, horaReserva, numeroPersonas, comentarioReserva });
 
-    // Solo proceder si todos los parámetros necesarios están disponibles
-    if (!fechaReservaStr || !horaReserva || !numeroPersonas) {
-        console.log('Faltan detalles para la reserva, se espera que Dialogflow maneje las solicitudes de información.');
-        break; // Salimos del switch para evitar responder con mensajes adicionales
-    }
+                // Solo proceder si todos los parámetros necesarios están disponibles
+                if (!fechaReservaStr || !horaReserva || !numeroPersonas) {
+                    console.log('Faltan detalles para la reserva, se espera que Dialogflow maneje las solicitudes de información.');
+                    break; // Salimos del switch para evitar responder con mensajes adicionales
+                }
 
-    // Convertir la fecha correctamente
-    let fechaReserva;
+                // Crear una reserva con los parámetros proporcionados
+                const reserva = new Reserva({
+                    nombre: nombre,
+                    fecha: new Date(), // Usar la fecha actual
+                    hora: horaReserva,
+                    numeroPersonas: numeroPersonas,
+                    comentario: comentarioReserva,
+                    confirmada: false, // Confirmar más adelante
+                });
 
-    if (moment(fechaReservaStr, 'DD-MM-YYYY', true).isValid()) {
-        fechaReserva = moment(fechaReservaStr, 'DD-MM-YYYY').toDate();
-    } else if (moment(fechaReservaStr, 'DD/MM/YYYY', true).isValid()) {
-        fechaReserva = moment(fechaReservaStr, 'DD/MM/YYYY').toDate();
-    } else if (moment(fechaReservaStr, 'DD/MM', true).isValid()) {
-        // Asignar el año actual si no se proporciona
-        const currentYear = new Date().getFullYear();
-        fechaReserva = moment(fechaReservaStr + '/' + currentYear, 'DD/MM/YYYY').toDate();
-    } else {
-        await message.reply('La fecha proporcionada no es válida. Por favor, usa el formato DD-MM-YYYY o DD/MM.');
-        break;
-    }
+                console.log('Creando reserva:', reserva);
 
-    // Crear una reserva con los parámetros proporcionados
-    const reserva = new Reserva({
-        nombre: nombre,
-        fecha: fechaReserva,
-        hora: horaReserva,
-        numeroPersonas: numeroPersonas,
-        comentario: comentarioReserva,
-        confirmada: false, // Confirmar más adelante
-    });
+                try {
+                    await reserva.save();
+                    console.log('Reserva guardada exitosamente:', reserva);
+                    await message.reply(`¡Gracias, ${nombre}! Tu reserva para ${numeroPersonas} personas ha sido creada exitosamente.`);
+                } catch (error) {
+                    console.error('Error al guardar reserva:', error);
+                    await message.reply('Lo siento, ocurrió un error al guardar tu reserva. Por favor, intenta nuevamente más tarde.');
+                }
 
-    console.log('Creando reserva:', reserva);
-
-    try {
-        await reserva.save();
-        console.log('Reserva guardada exitosamente:', reserva);
-        await message.reply(`¡Gracias, ${nombre}! Tu reserva para ${numeroPersonas} personas el ${moment(reserva.fecha).format('YYYY-MM-DD')} a las ${reserva.hora} ha sido creada exitosamente.`);
-    } catch (error) {
-        console.error('Error al guardar reserva:', error);
-        await message.reply('Lo siento, ocurrió un error al guardar tu reserva. Por favor, intenta nuevamente más tarde.');
-    }
-
-    break;
+                break;
 
             case 'HacerPedido':
                 // ... (mantén el código existente)
