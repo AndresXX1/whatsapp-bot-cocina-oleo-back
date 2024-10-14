@@ -7,6 +7,7 @@ const BotResponse = require('./models/botResponse'); // Importar el modelo BotRe
 const { setQRCode } = require('./controllers');
 const moment = require('moment'); // Asegúrate de tener moment instalado
 const mongoose = require('mongoose'); // Importar mongoose para logs
+const moment = require('moment');
 require('dotenv').config();
 
 // Inicializar WhatsApp client con autenticación local para mantener la sesión
@@ -103,7 +104,13 @@ client.on('message', async (message) => {
                 try {
                     await reserva.save();
                     console.log('Reserva guardada exitosamente:', reserva);
-                    await message.reply(`¡Gracias, ${nombre}! Tu reserva para ${numeroPersonas} personas el día ${fechaReservaStr} a las ${horaReserva} ha sido creada exitosamente.`);
+                    
+                    const formattedDate = moment(fechaReservaStr).format('DD/MM/YYYY');
+                    const formattedTime = moment(horaReserva).format('HH:mm');
+                    
+                    await message.reply(`¡Gracias, ${nombre}! Tu reserva para ${numeroPersonas} personas ha sido creada exitosamente.\n` +
+                                       `Fecha: ${formattedDate}\n` +
+                                       `Hora: ${formattedTime}`);
                 } catch (error) {
                     console.error('Error al guardar reserva:', error);
                     await message.reply('Lo siento, ocurrió un error al guardar tu reserva. Por favor, intenta nuevamente más tarde.');
