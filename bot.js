@@ -91,19 +91,19 @@ client.on('message', async (message) => {
                 // Crear una reserva con los parámetros proporcionados
                 const reserva = new Reserva({
                     nombre: nombre,
-                    fecha: new Date(), // Usar la fecha actual
+                    fecha: new Date(fechaReservaStr), // Usa la fecha proporcionada por el usuario
                     hora: horaReserva,
                     numeroPersonas: numeroPersonas,
                     comentario: comentarioReserva,
                     confirmada: false, // Confirmar más adelante
                 });
-
+                
                 console.log('Creando reserva:', reserva);
-
+                
                 try {
                     await reserva.save();
                     console.log('Reserva guardada exitosamente:', reserva);
-                    await message.reply(`¡Gracias, ${nombre}! Tu reserva para ${numeroPersonas} el dia ${fecha} a las ${hora} personas ha sido creada exitosamente.`);
+                    await message.reply(`¡Gracias, ${nombre}! Tu reserva para ${numeroPersonas} personas el día ${fechaReservaStr} a las ${horaReserva} ha sido creada exitosamente.`);
                 } catch (error) {
                     console.error('Error al guardar reserva:', error);
                     await message.reply('Lo siento, ocurrió un error al guardar tu reserva. Por favor, intenta nuevamente más tarde.');
