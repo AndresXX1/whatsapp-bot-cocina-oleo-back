@@ -82,13 +82,10 @@ client.on('message', async (message) => {
             
                 console.log('Parámetros de reserva:', { nombre, fechaReservaStr, horaReserva, numeroPersonas, comentarioReserva });
             
-                // Si falta alguno de los parámetros requeridos, no envíes el mensaje de solicitud de más detalles
+                // Solo proceder si todos los parámetros necesarios están disponibles
                 if (!fechaReservaStr || !horaReserva || !numeroPersonas) {
-                    // Solo enviar el mensaje si es la primera vez que se detecta que faltan detalles
-                    if (!dialogflowResponse.parameters['fallback_triggered']) {
-                        await message.reply('Por favor, proporciona todos los detalles para la reserva (nombre, fecha, hora y número de personas).');
-                    }
-                    break;
+                    console.log('Faltan detalles para la reserva, se espera que Dialogflow maneje las solicitudes de información.');
+                    break; // Salimos del switch para evitar responder con mensajes adicionales
                 }
             
                 // Convertir la fecha correctamente
