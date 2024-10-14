@@ -4,7 +4,7 @@ const { detectIntent } = require('./dialogFlowClient');
 const Reserva = require('./models/Reserva');
 const Pedido = require('./models/Pedido');
 const Evento = require('./models/Evento');
-const BotResponse = require('./models/botResponse');
+const BotResponse = require('./models/botResponse'); // Importar el modelo BotResponse
 const { setQRCode } = require('./controllers');
 require('dotenv').config();
 
@@ -78,8 +78,10 @@ client.on('message', async (message) => {
                 const numeroPersonas = dialogflowResponse.parameters.numero_personas?.numberValue;
                 const comentarioReserva = dialogflowResponse.parameters.comentario_reserva?.stringValue || '';
 
+                console.log('Parámetros de reserva:', { nombre, fechaReserva, horaReserva, numeroPersonas, comentarioReserva });
+
                 if (!fechaReserva || !horaReserva || !numeroPersonas) {
-                   
+                    await message.reply('Por favor, proporciona todos los detalles para la reserva (nombre, fecha, hora y número de personas).');
                     break;
                 }
 
@@ -93,8 +95,11 @@ client.on('message', async (message) => {
                     confirmada: false, // Confirmar más adelante
                 });
 
+                console.log('Creando reserva:', reserva);
+
                 await reserva.save();
-                console.log('Reserva creada:', reserva);
+                console.log('Reserva guardada exitosamente:', reserva);
+
                 await message.reply('Tu reserva ha sido creada exitosamente.');
                 break;
 

@@ -17,16 +17,20 @@ app.use(cors({
 }));
 
 // Conectar a la base de datos
-connectDB();
+connectDB().then(() => {
+    // Rutas del API
+    app.use('/api', apiroutes);
 
-// Rutas del API
-app.use('/api', apiroutes);
+    // Iniciar servidor
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log(`Servidor iniciado en el puerto ${PORT}`);
+    });
 
-// Iniciar servidor
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Servidor iniciado en el puerto ${PORT}`);
+    // Iniciar el bot de WhatsApp
+    bot.initialize();
+
+}).catch(err => {
+    console.error('Error al conectar a la base de datos:', err);
+    process.exit(1);
 });
-
-// Iniciar el bot de WhatsApp
-bot;
