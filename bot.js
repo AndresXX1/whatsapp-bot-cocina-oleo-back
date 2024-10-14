@@ -49,6 +49,7 @@ const getParamValue = (param) => {
         if (param.structValue.fields.startDate) {
             return param.structValue.fields.startDate.stringValue; // Extrae startDate para la reserva
         }
+        // Puedes agregar más lógica aquí si es necesario
     }
     if (param.listValue && param.listValue.values && param.listValue.values.length > 0) {
         const firstValue = param.listValue.values[0];
@@ -58,10 +59,6 @@ const getParamValue = (param) => {
     return undefined;
 };
 
-// Función para formatear las fechas y horas
-function formatDateTime(dateString) {
-    return moment(dateString).format('DD/MM/YYYY [a las] HH:mm');
-}
 
 // Evento Message
 client.on('message', async (message) => {
@@ -105,56 +102,55 @@ client.on('message', async (message) => {
             case 'ReservarMesa':
                 // Extraer los parámetros usando la función auxiliar
                 const fechaReservaStr = getParamValue(dialogflowResponse.parameters.fecha_reserva);
-                const horaReservaStr = getParamValue(dialogflowResponse.parameters.hora_reserva);
+                const horaReserva = getParamValue(dialogflowResponse.parameters.hora_reserva);
                 const numeroPersonas = getParamValue(dialogflowResponse.parameters.numero_personas);
                 const comentarioReserva = getParamValue(dialogflowResponse.parameters.comentario_reserva) || '';
 
-                console.log('Parámetros de reserva:', { nombre, fechaReservaStr, horaReservaStr, numeroPersonas, comentarioReserva });
+                console.log('Parámetros de reserva:', { nombre, fechaReservaStr, horaReserva, numeroPersonas, comentarioReserva });
 
                 // Validaciones adicionales
-                if (!fechaReservaStr || !horaReservaStr || !numeroPersonas) {
+                if (!fechaReservaStr || !horaReserva || !numeroPersonas) {
                     console.log('Faltan detalles para la reserva, se espera que Dialogflow maneje las solicitudes de información.');
-                    break;
+                    break; // Salimos del switch para evitar responder con mensajes adicionales
                 }
 
                 // Convertir la fecha correctamente
-                // Parsear fecha en formato ISO 8601 (Dialogflow devuelve YYYY-MM-DD)
-                const fechaReserva = moment(fechaReservaStr, 'YYYY-MM-DD', true);
-                if (!fechaReserva.isValid()) {
-                    await message.reply('La fecha proporcionada no es válida. Por favor, usa el formato DD-MM-YYYY o DD/MM.');
-                    break;
-                }
+                let fechaReserva;
 
-                // Parsear hora en formato HH:mm
-                const horaReserva = moment(horaReservaStr, ['HH:mm', 'H:mm'], true);
-                if (!horaReserva.isValid()) {
-                    await message.reply('La hora proporcionada no es válida. Por favor, usa el formato HH:MM.');
+                if (moment(fechaReservaStr, 'DD-MM-YYYY', true).isValid()) {
+                    fechaReserva = moment(fechaReservaStr, 'DD-MM-YYYY').toDate();
+                } else if (moment(fechaReservaStr, 'DD/MM/YYYY', true).isValid()) {
+                    fechaReserva = moment(fechaReservaStr, 'DD/MM/YYYY').toDate();
+                } else if (moment(fechaReservaStr, 'DD/MM', true).isValid()) {
+                    // Asignar el año actual si no se proporciona
+                    const currentYear = new Date().getFullYear();
+                    fechaReserva = moment(fechaReservaStr + '/' + currentYear, 'DD/MM/YYYY').toDate();
+                } else {
+                    await message.reply('La fecha proporcionada no es válida. Por favor, usa el formato DD-MM-YYYY o DD/MM.');
                     break;
                 }
 
                 // Validaciones de la fecha
                 const today = moment().startOf('day');
+                const reservaMoment = moment(fechaReserva);
 
-                if (fechaReserva.isSameOrBefore(today, 'day')) {
+                if (!reservaMoment.isValid()) {
+                    await message.reply('La fecha proporcionada no es válida. Por favor, usa el formato DD-MM-YYYY o DD/MM.');
+                    break;
+                }
+
+                if (reservaMoment.isSameOrBefore(today, 'day')) {
                     await message.reply('La fecha de reserva debe ser a partir de mañana.');
                     break;
                 }
 
-                if (fechaReserva.diff(today, 'days') > 20) {
+                if (reservaMoment.diff(today, 'days') > 20) {
                     await message.reply('Las reservas solo pueden realizarse hasta 20 días en el futuro.');
                     break;
                 }
 
                 // Validar que la cantidad máxima de personas por día no supere 50
-                const fechaInicioDia = fechaReserva.clone().startOf('day').toDate();
-                const fechaFinDia = fechaReserva.clone().endOf('day').toDate();
-
-                const reservasDia = await Reserva.find({
-                    fecha: {
-                        $gte: fechaInicioDia,
-                        $lte: fechaFinDia
-                    }
-                });
+                const reservasDia = await Reserva.find({ fecha: reservaMoment.startOf('day').toDate() });
                 const totalPersonasDia = reservasDia.reduce((total, reserva) => total + reserva.numeroPersonas, 0);
 
                 if ((totalPersonasDia + numeroPersonas) > 50) {
@@ -165,8 +161,8 @@ client.on('message', async (message) => {
                 // Crear una reserva con los parámetros proporcionados
                 const reserva = new Reserva({
                     nombre: nombre,
-                    fecha: fechaReserva.toDate(), // Guardar solo la fecha
-                    hora: horaReserva.format('HH:mm'), // Guardar la hora en formato HH:mm
+                    fecha: reservaMoment.toDate(),
+                    hora: horaReserva,
                     numeroPersonas: numeroPersonas,
                     comentario: comentarioReserva,
                     confirmada: false, // Confirmar más adelante
@@ -177,12 +173,7 @@ client.on('message', async (message) => {
                 try {
                     await reserva.save();
                     console.log('Reserva guardada exitosamente:', reserva);
-
-                    // Formatear la fecha y hora para mostrar al usuario
-                    const fechaFormateada = fechaReserva.format('DD [de] MMMM [de] YYYY');
-                    const horaFormateada = horaReserva.format('HH:mm');
-
-                    await message.reply(`¡Gracias, ${nombre}! Tu reserva para ${numeroPersonas} personas el ${fechaFormateada} a las ${horaFormateada} ha sido creada exitosamente.`);
+                    await message.reply(`¡Gracias, ${nombre}! Tu reserva para ${numeroPersonas} personas el ${moment(reserva.fecha).format('YYYY-MM-DD')} a las ${reserva.hora} ha sido creada exitosamente.`);
                 } catch (error) {
                     console.error('Error al guardar reserva:', error);
                     await message.reply('Lo siento, ocurrió un error al guardar tu reserva. Por favor, intenta nuevamente más tarde.');
