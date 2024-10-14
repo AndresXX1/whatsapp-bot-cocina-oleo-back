@@ -58,6 +58,11 @@ const getParamValue = (param) => {
     return undefined;
 };
 
+// Función para formatear las fechas y horas
+function formatDateTime(dateString) {
+    return moment(dateString).format('DD/MM/YYYY [a las] HH:mm');
+}
+
 // Evento Message
 client.on('message', async (message) => {
     if (message.fromMe) return; // Ignorar mensajes enviados por el bot
