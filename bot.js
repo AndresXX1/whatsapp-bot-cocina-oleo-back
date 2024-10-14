@@ -1,11 +1,12 @@
+// bot.js
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const { detectIntent } = require('./dialogFlowClient');
 const Reserva = require('./models/Reserva');
-const Pedido = require('./models/Pedido');
-const Evento = require('./models/Evento');
 const BotResponse = require('./models/botResponse'); // Importar el modelo BotResponse
 const { setQRCode } = require('./controllers');
+const moment = require('moment'); // Asegúrate de tener moment instalado
+const mongoose = require('mongoose'); // Importar mongoose para logs
 require('dotenv').config();
 
 // Inicializar WhatsApp client con autenticación local para mantener la sesión
@@ -32,6 +33,7 @@ client.on('qr', (qr) => {
 // Evento Ready
 client.on('ready', () => {
     console.log('Bot de WhatsApp listo!');
+    console.log('Base de datos conectada a:', mongoose.connection.db.databaseName);
 });
 
 // Evento Message
@@ -73,94 +75,71 @@ client.on('message', async (message) => {
         switch (dialogflowResponse.intent) {
             case 'ReservarMesa':
                 // Validar la existencia de todos los parámetros necesarios
-                const fechaReserva = dialogflowResponse.parameters.fecha_reserva?.stringValue;
+                const fechaReservaStr = dialogflowResponse.parameters.fecha_reserva?.stringValue;
                 const horaReserva = dialogflowResponse.parameters.hora_reserva?.stringValue;
                 const numeroPersonas = dialogflowResponse.parameters.numero_personas?.numberValue;
                 const comentarioReserva = dialogflowResponse.parameters.comentario_reserva?.stringValue || '';
-
-                console.log('Parámetros de reserva:', { nombre, fechaReserva, horaReserva, numeroPersonas, comentarioReserva });
-
-                if (!fechaReserva || !horaReserva || !numeroPersonas) {
-                    await message.reply('Por favor, proporciona todos los detalles para la reserva (nombre, fecha, hora y número de personas).');
+            
+                console.log('Parámetros de reserva:', { nombre, fechaReservaStr, horaReserva, numeroPersonas, comentarioReserva });
+            
+                // Si falta alguno de los parámetros requeridos, no envíes el mensaje de solicitud de más detalles
+                if (!fechaReservaStr || !horaReserva || !numeroPersonas) {
+                    // Solo enviar el mensaje si es la primera vez que se detecta que faltan detalles
+                    if (!dialogflowResponse.parameters['fallback_triggered']) {
+                        await message.reply('Por favor, proporciona todos los detalles para la reserva (nombre, fecha, hora y número de personas).');
+                    }
                     break;
                 }
-
+            
+                // Convertir la fecha correctamente
+                let fechaReserva;
+            
+                if (moment(fechaReservaStr, 'DD-MM-YYYY', true).isValid()) {
+                    fechaReserva = moment(fechaReservaStr, 'DD-MM-YYYY').toDate();
+                } else if (moment(fechaReservaStr, 'DD/MM/YYYY', true).isValid()) {
+                    fechaReserva = moment(fechaReservaStr, 'DD/MM/YYYY').toDate();
+                } else if (moment(fechaReservaStr, 'DD/MM', true).isValid()) {
+                    // Asignar el año actual si no se proporciona
+                    const currentYear = new Date().getFullYear();
+                    fechaReserva = moment(fechaReservaStr + '/' + currentYear, 'DD/MM/YYYY').toDate();
+                } else {
+                    await message.reply('La fecha proporcionada no es válida. Por favor, usa el formato DD-MM-YYYY o DD/MM.');
+                    break;
+                }
+            
                 // Crear una reserva con los parámetros proporcionados
                 const reserva = new Reserva({
                     nombre: nombre,
-                    fecha: new Date(fechaReserva),
+                    fecha: fechaReserva,
                     hora: horaReserva,
                     numeroPersonas: numeroPersonas,
                     comentario: comentarioReserva,
                     confirmada: false, // Confirmar más adelante
                 });
-
+            
                 console.log('Creando reserva:', reserva);
-
-                await reserva.save();
-                console.log('Reserva guardada exitosamente:', reserva);
-
-                await message.reply('Tu reserva ha sido creada exitosamente.');
+            
+                try {
+                    await reserva.save();
+                    console.log('Reserva guardada exitosamente:', reserva);
+                    await message.reply(`¡Gracias, ${nombre}! Tu reserva para ${numeroPersonas} personas el ${moment(reserva.fecha).format('YYYY-MM-DD')} a las ${reserva.hora} ha sido creada exitosamente.`);
+                } catch (error) {
+                    console.error('Error al guardar reserva:', error);
+                    await message.reply('Lo siento, ocurrió un error al guardar tu reserva. Por favor, intenta nuevamente más tarde.');
+                }
+            
                 break;
 
             case 'HacerPedido':
-                // Validar parámetros necesarios
-                const nombreCliente = dialogflowResponse.parameters.nombre_cliente?.stringValue || 'Cliente';
-                const direccion = dialogflowResponse.parameters.direccion?.stringValue || '';
-                const itemsList = dialogflowResponse.parameters.items_pedido?.listValue?.values;
-
-                if (!itemsList || itemsList.length === 0) {
-                    await message.reply('Por favor, proporciona al menos un ítem para tu pedido.');
-                    break;
-                }
-
-                const items = itemsList.map(item => ({
-                    nombre: item.structValue.fields.nombre_carta?.stringValue || 'Ítem sin nombre',
-                    cantidad: item.structValue.fields.cantidad_item?.numberValue || 1,
-                    precio: item.structValue.fields.precio?.numberValue || 0,
-                }));
-
-                // Calcular el total del pedido
-                const total = items.reduce((acc, item) => acc + (item.cantidad * item.precio), 0);
-
-                const pedido = new Pedido({
-                    nombreCliente: nombreCliente,
-                    direccion: direccion,
-                    items: items,
-                    total: total,
-                    estado: 'pendiente',
-                });
-
-                await pedido.save();
-                console.log('Pedido creado:', pedido);
-                await message.reply(`Tu pedido ha sido creado exitosamente. El total es de $${total}.`);
+                // ... (mantén el código existente)
                 break;
 
             case 'ConsultarEventos':
-                // Listar eventos disponibles
-                const eventos = await Evento.find();
-                if (eventos.length > 0) {
-                    const eventosTexto = eventos.map((evento, index) => `${index + 1}. ${evento.titulo}`).join('\n');
-                    await message.reply(`Nuestros próximos eventos son:\n${eventosTexto}. Por favor responde con el número del evento para más detalles.`);
-                } else {
-                    await message.reply('Actualmente no tenemos eventos programados.');
-                }
+                // ... (mantén el código existente)
                 break;
 
             case 'DetalleEvento':
-                // Proporcionar detalles de un evento específico
-                const numeroEvento = dialogflowResponse.parameters.numero_opcion?.numberValue;
-                if (!numeroEvento) {
-                    await message.reply('Por favor, proporciona el número del evento para más detalles.');
-                    break;
-                }
-
-                const eventoSeleccionado = await Evento.findOne().skip(numeroEvento - 1);
-                if (eventoSeleccionado) {
-                    await message.reply(`El evento "${eventoSeleccionado.titulo}" es el ${eventoSeleccionado.fecha.toLocaleDateString()} a las ${eventoSeleccionado.hora}. ${eventoSeleccionado.descripcion}. ¿Te gustaría asistir?`);
-                } else {
-                    await message.reply('No encontramos el evento seleccionado.');
-                }
+                // ... (mantén el código existente)
                 break;
 
             // ... otros casos para intents
@@ -179,3 +158,6 @@ client.on('message', async (message) => {
 
 // Inicializar el cliente de WhatsApp
 client.initialize();
+
+// Exportar el cliente si es necesario
+module.exports = client;
