@@ -58,7 +58,6 @@ const getParamValue = (param) => {
     return undefined;
 };
 
-
 // Evento Message
 client.on('message', async (message) => {
     if (message.fromMe) return; // Ignorar mensajes enviados por el bot
@@ -100,7 +99,7 @@ client.on('message', async (message) => {
         switch (dialogflowResponse.intent) {
             case 'ReservarMesa':
                 // Extraer los parámetros usando la función auxiliar
-                const fechaReservaStr = getParamValue(dialogflowResponse.parameters.fecha_reserva); // Usar startDate
+                const fechaReservaStr = getParamValue(dialogflowResponse.parameters.fecha_reserva);
                 const horaReservaStr = getParamValue(dialogflowResponse.parameters.hora_reserva);
                 const numeroPersonas = getParamValue(dialogflowResponse.parameters.numero_personas);
                 const comentarioReserva = getParamValue(dialogflowResponse.parameters.comentario_reserva) || '';
@@ -110,13 +109,12 @@ client.on('message', async (message) => {
                 // Validaciones adicionales
                 if (!fechaReservaStr || !horaReservaStr || !numeroPersonas) {
                     console.log('Faltan detalles para la reserva, se espera que Dialogflow maneje las solicitudes de información.');
-                    break; // Salimos del switch para evitar responder con mensajes adicionales
+                    break;
                 }
 
-                // Convertir la fecha y hora correctamente
-                // Parsear fecha en formato DD/MM/YYYY o DD-MM-YYYY
-                const formatosFecha = ['DD-MM-YYYY', 'DD/MM/YYYY'];
-                const fechaReserva = moment(fechaReservaStr, formatosFecha, true);
+                // Convertir la fecha correctamente
+                // Parsear fecha en formato ISO 8601 (Dialogflow devuelve YYYY-MM-DD)
+                const fechaReserva = moment(fechaReservaStr, 'YYYY-MM-DD', true);
                 if (!fechaReserva.isValid()) {
                     await message.reply('La fecha proporcionada no es válida. Por favor, usa el formato DD-MM-YYYY o DD/MM.');
                     break;
@@ -143,8 +141,8 @@ client.on('message', async (message) => {
                 }
 
                 // Validar que la cantidad máxima de personas por día no supere 50
-                const fechaInicioDia = fechaReserva.startOf('day').toDate();
-                const fechaFinDia = fechaReserva.endOf('day').toDate();
+                const fechaInicioDia = fechaReserva.clone().startOf('day').toDate();
+                const fechaFinDia = fechaReserva.clone().endOf('day').toDate();
 
                 const reservasDia = await Reserva.find({
                     fecha: {
