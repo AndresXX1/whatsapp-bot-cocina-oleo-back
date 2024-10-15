@@ -4,7 +4,7 @@ const qrcode = require('qrcode-terminal');
 const { detectIntent } = require('./dialogFlowClient');
 const Reserva = require('./models/Reserva');
 const BotResponse = require('./models/botResponse'); // Importar el modelo BotResponse
-const { setQRCode } = require('./controllers');
+const { setQRCode, handleOrder } = require('./controllers');
 const moment = require('moment'); // Asegúrate de tener moment instalado
 const mongoose = require('mongoose'); // Importar mongoose para logs
 require('dotenv').config();
@@ -64,7 +64,7 @@ client.on('message', async (message) => {
             const randomIndex = Math.floor(Math.random() * customResponse.responses.length);
             fulfillmentText = customResponse.responses[randomIndex].replace('$nombre', nombre);
         }
-
+        
         // Enviar la respuesta al usuario
         if (fulfillmentText) {
             await message.reply(fulfillmentText);
@@ -137,7 +137,7 @@ client.on('message', async (message) => {
         
 
             case 'HacerPedido':
-                await PedidoController.handleOrder(dialogflowResponse, message);
+                await handleOrder(dialogflowResponse, message)
                 break;
 
             case 'ConsultarEventos':
