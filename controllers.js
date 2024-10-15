@@ -71,29 +71,32 @@ const handleOrder = async (dialogflowResponse, message) => {
     const existingOrder = await Pedido.findOne({ nombre, apellido });
 
     if (!existingOrder) {
-        // Preguntar por el pedido
-        await message.reply(`Hola ${nombre}, ¿qué te gustaría pedir de la carta?`);
-        // Aquí puedes manejar la lógica para capturar el pedido y almacenarlo
-        // por ejemplo, creando un nuevo pedido y esperando la respuesta del usuario.
+        // Crear un nuevo pedido
+        const newPedido = new Pedido({
+            nombre,
+            apellido,
+            pedido: '',
+            metodo_entrega: dialogflowResponse.parameters.metodo_entrega || '',
+            direccion: '',
+            metodo_pago: dialogflowResponse.parameters.metodo_pago || '',
+            estado: 'pendiente'
+        });
 
+        try {
+            await newPedido.save();
+            await message.reply(`¡Gracias ${nombre}! Tu pedido ha sido creado exitosamente.`);
+        } catch (error) {
+            console.error('Error al crear el pedido:', error);
+            await message.reply('Lo siento, ocurrió un error al guardar tu pedido. Por favor, inténtalo nuevamente.');
+        }
     } else {
         await message.reply(`Hola ${nombre}, ya tienes un pedido en curso: ${existingOrder.pedido}.`);
     }
 
-    // Preguntar por el método de entrega
-    const metodo_entrega = dialogflowResponse.parameters.metodo_entrega;
-    if (metodo_entrega === 'delivery') {
-        await message.reply('Por favor, indícame tu dirección para el delivery.');
-        // Aquí puedes capturar la dirección y continuar con el flujo
-    }
-
-    // Preguntar por el método de pago
-    const metodo_pago = dialogflowResponse.parameters.metodo_pago;
-    await message.reply(`Tu método de pago es: ${metodo_pago}.`);
-
     // Confirmar el pedido
-    await message.reply(`¡Gracias por tu pedido, ${nombre}! Un agente se comunicará contigo para cerrar detalles.`);
+    await message.reply(`Tu pedido está pendiente de confirmación. Un agente se comunicará contigo pronto para cerrar detalles.`);
 };
+
 
 module.exports = { crearReserva, obtenerReservas, getQRCode, setQRCode, handleOrder };
 
