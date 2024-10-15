@@ -75,9 +75,9 @@ const handleOrder = async (dialogflowResponse, message) => {
         const newPedido = new Pedido({
             nombre,
             apellido,
-            pedido: '',
+            pedido: dialogflowResponse.parameters.pedido || '',
             metodo_entrega: dialogflowResponse.parameters.metodo_entrega || '',
-            direccion: '',
+            direccion: dialogflowResponse.parameters.direccion || '',
             metodo_pago: dialogflowResponse.parameters.metodo_pago || '',
             estado: 'pendiente'
         });
@@ -96,6 +96,8 @@ const handleOrder = async (dialogflowResponse, message) => {
     // Confirmar el pedido
     await message.reply(`Tu pedido está pendiente de confirmación. Un agente se comunicará contigo pronto para cerrar detalles.`);
 };
+
+
 
 
 module.exports = { crearReserva, obtenerReservas, getQRCode, setQRCode, handleOrder };
