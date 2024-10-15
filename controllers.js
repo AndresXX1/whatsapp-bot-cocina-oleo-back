@@ -10,7 +10,6 @@ const Propina = require('./models/Propina');
 const InventarioCocina = require('./models/InventarioCocina');
 const InventarioBebidas = require('./models/InventarioBebidas');
 
-
 // Obtener el código QR
 let lastQRCode = '';
 
@@ -26,11 +25,7 @@ const getQRCode = (req, res) => {
     }
 };
 
-
-
 //////////////////////////////// Reservas ////////////////////////////////
-
-
 
 const crearReserva = async (req, res) => {
     const { nombre, fecha_reserva, hora_reserva, numero_personas, comentario } = req.body;
@@ -67,5 +62,38 @@ const obtenerReservas = async (req, res) => {
     }
 };
 
-module.exports = { crearReserva, obtenerReservas, getQRCode, setQRCode, };
+////////////////////// Pedidos //////////////////////////
+
+const handleOrder = async (dialogflowResponse, message) => {
+    const { nombre, apellido } = dialogflowResponse.parameters;
+
+    // Buscar si ya hay un pedido existente
+    const existingOrder = await Pedido.findOne({ nombre, apellido });
+
+    if (!existingOrder) {
+        // Preguntar por el pedido
+        await message.reply(`Hola ${nombre}, ¿qué te gustaría pedir de la carta?`);
+        // Aquí puedes manejar la lógica para capturar el pedido y almacenarlo
+        // por ejemplo, creando un nuevo pedido y esperando la respuesta del usuario.
+
+    } else {
+        await message.reply(`Hola ${nombre}, ya tienes un pedido en curso: ${existingOrder.pedido}.`);
+    }
+
+    // Preguntar por el método de entrega
+    const metodo_entrega = dialogflowResponse.parameters.metodo_entrega;
+    if (metodo_entrega === 'delivery') {
+        await message.reply('Por favor, indícame tu dirección para el delivery.');
+        // Aquí puedes capturar la dirección y continuar con el flujo
+    }
+
+    // Preguntar por el método de pago
+    const metodo_pago = dialogflowResponse.parameters.metodo_pago;
+    await message.reply(`Tu método de pago es: ${metodo_pago}.`);
+
+    // Confirmar el pedido
+    await message.reply(`¡Gracias por tu pedido, ${nombre}! Un agente se comunicará contigo para cerrar detalles.`);
+};
+
+module.exports = { crearReserva, obtenerReservas, getQRCode, setQRCode, handleOrder };
 

@@ -137,7 +137,7 @@ client.on('message', async (message) => {
         
 
             case 'HacerPedido':
-                // ... (mantén el código existente)
+                await PedidoController.handleOrder(dialogflowResponse, message);
                 break;
 
             case 'ConsultarEventos':
