@@ -36,7 +36,6 @@ client.on('ready', () => {
     console.log('Base de datos conectada a:', mongoose.connection.db.databaseName);
 });
 
-// Evento Message
 client.on('message', async (message) => {
     const msg = message.body.trim();
     const from = message.from;
@@ -46,6 +45,7 @@ client.on('message', async (message) => {
 
         // Detectar intención usando Dialogflow
         const dialogflowResponse = await detectIntent(msg, from);
+        console.log('Respuesta de Dialogflow:', dialogflowResponse);
 
         // Obtener el nombre del usuario si está disponible
         const nombre = dialogflowResponse.parameters.nombre?.stringValue || 'Cliente';
@@ -73,67 +73,7 @@ client.on('message', async (message) => {
         // Manejar acciones basadas en la intención
         switch (dialogflowResponse.intent) {
             case 'ReservarMesa':
-                // Validar la existencia de todos los parámetros necesarios
-                const fechaReservaStr = dialogflowResponse.parameters.fecha_reserva?.stringValue;
-                const horaReserva = dialogflowResponse.parameters.hora_reserva?.stringValue;
-                const numeroPersonas = dialogflowResponse.parameters.numero_personas?.numberValue;
-                const comentarioReserva = dialogflowResponse.parameters.comentario_reserva?.stringValue || '';
-                
-                console.log('Parámetros de reserva:', { nombre, fechaReservaStr, horaReserva, numeroPersonas, comentarioReserva });
-                
-                // Solo proceder si todos los parámetros necesarios están disponibles
-                if (!fechaReservaStr || !horaReserva || !numeroPersonas) {
-                    console.log('Faltan detalles para la reserva, se espera que Dialogflow maneje las solicitudes de información.');
-                    break; // Salimos del switch para evitar responder con mensajes adicionales
-                }
-                
-                // Comprobar si la fecha es válida (no debe ser en el pasado)
-                const today = new Date();
-                const dateToCompare = new Date(fechaReservaStr);
-                if (dateToCompare < today) {
-                    console.log('No se puede reservar en fechas pasadas.');
-                    await message.reply(`Lo siento, ${nombre}. No se puede reservar en fechas pasadas. Por favor, vuelve a comenzar escribiendo la palabra "reserva".`);
-                    break;
-                }
-                
-                // Comprobar disponibilidad diaria
-                const dayReservations = await Reserva.find({ fecha: dateToCompare.toISOString().split('T')[0] });
-                const totalPeople = dayReservations.reduce((sum, r) => sum + r.numeroPersonas, 0);
-                if (totalPeople >= 50) {
-                    console.log('No hay disponibilidad para esa fecha.');
-                    await message.reply(`Lo siento, ${nombre}. No hay disponibilidad para esa fecha. La capacidad máxima diaria es de 50 personas. Por favor, vuelve a comenzar escribiendo la palabra "reserva".`);
-                    break;
-                }
-                
-                // Crear una reserva con los parámetros proporcionados
-                const reserva = new Reserva({
-                    nombre: nombre,
-                    fecha: dateToCompare,
-                    hora: horaReserva,
-                    numeroPersonas: numeroPersonas,
-                    comentario: comentarioReserva,
-                    confirmada: false, // Confirmar más adelante
-                });
-                
-                console.log('Creando reserva:', reserva);
-                
-                try {
-                    await reserva.save();
-                    console.log('Reserva guardada exitosamente:', reserva);
-                    
-                    const formattedDate = moment(fechaReservaStr).format('DD/MM/YYYY');
-                    const formattedTime = moment(horaReserva).format('HH:mm');
-                    
-                    await message.reply(`¡Gracias, ${nombre}! Tu reserva para ${numeroPersonas} personas ha sido creada exitosamente.\n` +
-                                       `Fecha: ${formattedDate}\n` +
-                                       `Hora: ${formattedTime}`);
-                } catch (error) {
-                    console.error('Error al guardar reserva:', error);
-                    await message.reply(`Lo siento, ${nombre}. Ocurrió un error al guardar tu reserva. Por favor, vuelve a comenzar escribiendo la palabra "reserva".`);
-                }
-                
-                break;
-                
+                // ... (mantén el código existente para ReservarMesa)
 
             case 'HacerPedido':
                 await handleOrder(dialogflowResponse, message)
