@@ -2,15 +2,45 @@
 const mongoose = require('mongoose');
 
 const pedidoSchema = new mongoose.Schema({
-    nombreCliente: { type: String, required: true },
-    direccion: { type: String },
-    items: [{
-        nombre: { type: String, required: true },
-        cantidad: { type: Number, required: true },
-        precio: { type: Number, required: true },
-    }],
-    total: { type: Number, required: true },
-    estado: { type: String, default: 'pendiente' },
-}, { timestamps: true });
+    nombre: {
+        type: String,
+        required: true,
+    },
+    apellido: {
+        type: String,
+        required: true,
+    },
+    pedido: {
+        type: String,
+        required: true,
+    },
+    metodo_entrega: {
+        type: String,
+        enum: ['delivery', 'recogida'],
+        required: true,
+    },
+    direccion: {
+        type: String,
+        required: function () {
+            return this.metodo_entrega === 'delivery';
+        },
+    },
+    metodo_pago: {
+        type: String,
+        enum: ['efectivo', 'tarjeta'],
+        required: true,
+    },
+    estado: {
+        type: String,
+        enum: ['pendiente', 'en_proceso', 'completado', 'cancelado'],
+        default: 'pendiente',
+    },
+    fecha_creacion: {
+        type: Date,
+        default: Date.now,
+    },
+});
 
-module.exports = mongoose.model('Pedido', pedidoSchema);
+const Pedido = mongoose.model('Pedido', pedidoSchema);
+
+module.exports = Pedido;
