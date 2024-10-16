@@ -3,8 +3,9 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const { detectIntent } = require('./dialogFlowClient');
 const Reserva = require('./models/Reserva');
-const BotResponse = require('./models/botResponse'); // Importar el modelo BotResponse
-const { setQRCode, handleOrder } = require('./controllers');
+const BotResponse = require('./models/botResponse'); // Asegúrate de tener este modelo si lo usas
+const { setQRCode, crearReserva, guardarPedido } = require('./controllers');
+const { handlePedido } = require('./botpedido');
 const moment = require('moment'); // Asegúrate de tener moment instalado
 const mongoose = require('mongoose'); // Importar mongoose para logs
 require('dotenv').config();
@@ -33,10 +34,33 @@ client.on('qr', (qr) => {
 // Evento Ready
 client.on('ready', () => {
     console.log('Bot de WhatsApp listo!');
-    console.log('Base de datos conectada a:', mongoose.connection.db.databaseName);
+    if (mongoose.connection.db) {
+        console.log('Base de datos conectada a:', mongoose.connection.db.databaseName);
+    } else {
+        console.log('Base de datos no conectada.');
+    }
 });
 
+// Función auxiliar para extraer parámetros
+const getParamValue = (param) => {
+    if (!param) return undefined;
+    if (param.stringValue) return param.stringValue;
+    if (param.numberValue) return param.numberValue;
+    if (param.listValue && param.listValue.values && param.listValue.values.length > 0) {
+        const firstValue = param.listValue.values[0];
+        if (firstValue.stringValue) return firstValue.stringValue;
+        if (firstValue.numberValue) return firstValue.numberValue;
+    }
+    return undefined;
+};
+
+// Definir el enlace a la carta
+const enlaceCarta = "https://tu-carta.com"; // Reemplaza con el enlace real de tu carta
+
+// Evento Message
 client.on('message', async (message) => {
+    if (message.fromMe) return; // Ignorar mensajes enviados por el bot
+
     const msg = message.body.trim();
     const from = message.from;
 
@@ -45,12 +69,13 @@ client.on('message', async (message) => {
 
         // Detectar intención usando Dialogflow
         const dialogflowResponse = await detectIntent(msg, from);
-        console.log('Respuesta de Dialogflow:', dialogflowResponse);
+        console.log('Respuesta de Dialogflow:', JSON.stringify(dialogflowResponse, null, 2));
 
-        // Obtener el nombre del usuario si está disponible
-        const nombre = dialogflowResponse.parameters.nombre?.stringValue || 'Cliente';
+        // Obtener los parámetros
+        const nombre = getParamValue(dialogflowResponse.parameters.nombre) || getParamValue(dialogflowResponse.parameters.name) || 'Cliente';
+        const apellido = getParamValue(dialogflowResponse.parameters.apellido) || ''; // Puede ser ''
 
-        // Reemplazar variables en la fulfillmentText si existen
+        // Reemplazar variables en fulfillmentText
         let fulfillmentText = dialogflowResponse.fulfillmentText;
         if (fulfillmentText.includes('$nombre')) {
             fulfillmentText = fulfillmentText.replace('$nombre', nombre);
@@ -73,18 +98,51 @@ client.on('message', async (message) => {
         // Manejar acciones basadas en la intención
         switch (dialogflowResponse.intent) {
             case 'ReservarMesa':
-                // ... (mantén el código existente para ReservarMesa)
+                // Manejar la intención de reservar mesa
+                const { nombreReserva, fecha_reserva, hora_reserva, numero_personas, comentario } = {
+                    nombreReserva: getParamValue(dialogflowResponse.parameters.nombre) || getParamValue(dialogflowResponse.parameters.name) || '',
+                    fecha_reserva: getParamValue(dialogflowResponse.parameters.fecha_reserva),
+                    hora_reserva: getParamValue(dialogflowResponse.parameters.hora_reserva),
+                    numero_personas: getParamValue(dialogflowResponse.parameters.numero_personas),
+                    comentario: getParamValue(dialogflowResponse.parameters.comentario) || ''
+                };
+
+                if (!nombreReserva || !fecha_reserva || !hora_reserva || !numero_personas) {
+                    console.log('Faltan datos necesarios para la reserva.');
+                    // El bot ya ha enviado los prompts necesarios vía Dialogflow
+                    break;
+                }
+
+                try {
+                    const reservaGuardada = await crearReserva({
+                        nombre: nombreReserva,
+                        fecha_reserva,
+                        hora_reserva,
+                        numero_personas,
+                        comentario
+                    });
+
+                    console.log('Reserva guardada exitosamente:', reservaGuardada);
+                    // No enviar respuestas desde el controlador
+
+                } catch (error) {
+                    console.error('Error al crear la reserva:', error);
+                    // Puedes optar por enviar un mensaje de error al usuario si lo deseas
+                }
+
+                break;
 
             case 'HacerPedido':
-                await handleOrder(dialogflowResponse, message)
+                // Manejar la intención de hacer un pedido
+                await handlePedido(dialogflowResponse, message);
                 break;
 
             case 'ConsultarEventos':
-                // ... (mantén el código existente)
+                // ... (mantén el código existente para ConsultarEventos)
                 break;
 
             case 'DetalleEvento':
-                // ... (mantén el código existente)
+                // ... (mantén el código existente para DetalleEvento)
                 break;
 
             // ... otros casos para intents

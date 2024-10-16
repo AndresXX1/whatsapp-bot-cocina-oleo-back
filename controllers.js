@@ -64,36 +64,37 @@ const obtenerReservas = async (req, res) => {
 
 ////////////////////// Pedidos //////////////////////////
 
-const handleOrder = async (req, res) => {
-    const { nombre, apellido, pedido, metodo_entrega, direccion, metodo_pago } = req.body;
-
-    // Verifica que los campos requeridos estén presentes
+/**
+ * Función para guardar un pedido en la base de datos.
+ * @param {Object} pedidoData - Datos del pedido.
+ * @param {string} pedidoData.nombre - Nombre del cliente.
+ * @param {string} pedidoData.apellido - Apellido del cliente.
+ * @param {string} pedidoData.pedido - Producto pedido.
+ * @param {string} [pedidoData.metodo_entrega] - Método de entrega.
+ * @param {string} [pedidoData.direccion] - Dirección de entrega.
+ * @param {string} [pedidoData.metodo_pago] - Método de pago.
+ * @returns {Promise<Object>} - Pedido guardado.
+ */
+const guardarPedido = async ({ nombre, apellido, pedido, metodo_entrega, direccion, metodo_pago }) => {
     if (!nombre || !apellido || !pedido) {
-        return res.status(400).json({ message: 'Faltan datos necesarios para crear el pedido.' });
+        throw new Error('Faltan datos necesarios para crear el pedido.');
     }
 
-    try {
-        // Crear un nuevo pedido
-        const newPedido = new Pedido({
-            nombre,
-            apellido,
-            pedido,
-            metodo_entrega: metodo_entrega || '',
-            direccion: direccion || '',
-            metodo_pago: metodo_pago || '',
-            estado: 'pendiente'
-        });
+    const newPedido = new Pedido({
+        nombre,
+        apellido,
+        pedido,
+        metodo_entrega: metodo_entrega || '',
+        direccion: direccion || '',
+        metodo_pago: metodo_pago || '',
+        estado: 'pendiente'
+    });
 
-        // Guardar el pedido en la base de datos
-        await newPedido.save();
+    await newPedido.save();
 
-        // Responder con éxito sin mensajes adicionales
-        return res.status(201).json({ message: 'Pedido creado exitosamente.', pedido: newPedido });
-    } catch (error) {
-        console.error('Error al crear el pedido:', error);
-        return res.status(500).json({ message: 'Error al crear el pedido.' });
-    }
+    return newPedido;
 };
 
-module.exports = { crearReserva, obtenerReservas, getQRCode, setQRCode, handleOrder };
+
+module.exports = { crearReserva, obtenerReservas, getQRCode, setQRCode, guardarPedido };
 
