@@ -64,41 +64,36 @@ const obtenerReservas = async (req, res) => {
 
 ////////////////////// Pedidos //////////////////////////
 
-const handleOrder = async (dialogflowResponse, message) => {
-    const { nombre, apellido } = dialogflowResponse.parameters;
+const handleOrder = async (req, res) => {
+    const { nombre, apellido, pedido, metodo_entrega, direccion, metodo_pago } = req.body;
 
-    // Buscar si ya hay un pedido existente
-    const existingOrder = await Pedido.findOne({ nombre, apellido });
+    // Verifica que los campos requeridos estén presentes
+    if (!nombre || !apellido || !pedido) {
+        return res.status(400).json({ message: 'Faltan datos necesarios para crear el pedido.' });
+    }
 
-    if (!existingOrder) {
+    try {
         // Crear un nuevo pedido
         const newPedido = new Pedido({
             nombre,
             apellido,
-            pedido: dialogflowResponse.parameters.pedido || '',
-            metodo_entrega: dialogflowResponse.parameters.metodo_entrega || '',
-            direccion: dialogflowResponse.parameters.direccion || '',
-            metodo_pago: dialogflowResponse.parameters.metodo_pago || '',
+            pedido,
+            metodo_entrega: metodo_entrega || '',
+            direccion: direccion || '',
+            metodo_pago: metodo_pago || '',
             estado: 'pendiente'
         });
 
-        try {
-            await newPedido.save();
-            await message.reply(`¡Gracias ${nombre}! Tu pedido ha sido creado exitosamente.`);
-        } catch (error) {
-            console.error('Error al crear el pedido:', error);
-            await message.reply('Lo siento, ocurrió un error al guardar tu pedido. Por favor, inténtalo nuevamente.');
-        }
-    } else {
-        await message.reply(`Hola ${nombre}, ya tienes un pedido en curso: ${existingOrder.pedido}.`);
+        // Guardar el pedido en la base de datos
+        await newPedido.save();
+
+        // Responder con éxito sin mensajes adicionales
+        return res.status(201).json({ message: 'Pedido creado exitosamente.', pedido: newPedido });
+    } catch (error) {
+        console.error('Error al crear el pedido:', error);
+        return res.status(500).json({ message: 'Error al crear el pedido.' });
     }
-
-    // Confirmar el pedido
-    await message.reply(`Tu pedido está pendiente de confirmación. Un agente se comunicará contigo pronto para cerrar detalles.`);
 };
-
-
-
 
 module.exports = { crearReserva, obtenerReservas, getQRCode, setQRCode, handleOrder };
 
