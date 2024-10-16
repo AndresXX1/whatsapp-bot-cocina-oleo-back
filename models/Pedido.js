@@ -8,7 +8,7 @@ const pedidoSchema = new mongoose.Schema({
     },
     apellido: {
         type: String,
-        required: true,
+        required: false,
     },
     pedido: {
         type: String,
