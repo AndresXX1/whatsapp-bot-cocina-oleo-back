@@ -102,6 +102,39 @@ const obtenerPedidos = async (req, res) => {
     }
 };
 
+// Actualizar un pedido
+const actualizarPedido = async (req, res) => {
+    const { id } = req.params; // Obtener el ID del pedido desde los parámetros
+    const { nombre, apellido, pedido, metodo_entrega, direccion, metodo_pago, estado } = req.body; // Obtener los datos del pedido
+
+    try {
+        const pedidoActualizado = await Pedido.findByIdAndUpdate(id, { nombre, apellido, pedido, metodo_entrega, direccion, metodo_pago, estado }, { new: true });
+        if (!pedidoActualizado) {
+            return res.status(404).json({ message: 'Pedido no encontrado.' });
+        }
+        return res.status(200).json({ message: 'Pedido actualizado exitosamente.', pedido: pedidoActualizado });
+    } catch (error) {
+        console.error('Error al actualizar el pedido:', error);
+        return res.status(500).json({ message: 'Error al actualizar el pedido.' });
+    }
+};
+
+// Eliminar un pedido
+const eliminarPedido = async (req, res) => {
+    const { id } = req.params; // Obtener el ID del pedido desde los parámetros
+
+    try {
+        const pedidoEliminado = await Pedido.findByIdAndDelete(id);
+        if (!pedidoEliminado) {
+            return res.status(404).json({ message: 'Pedido no encontrado.' });
+        }
+        return res.status(200).json({ message: 'Pedido eliminado exitosamente.' });
+    } catch (error) {
+        console.error('Error al eliminar el pedido:', error);
+        return res.status(500).json({ message: 'Error al eliminar el pedido.' });
+    }
+};
+
 /**
  * Función para guardar un pedido en la base de datos.
  * @param {Object} pedidoData - Datos del pedido.
@@ -141,5 +174,7 @@ module.exports = {
     obtenerPedidos,
     getQRCode,
     setQRCode,
-    guardarPedido
+    guardarPedido,
+    eliminarPedido,
+    actualizarPedido,
 };
