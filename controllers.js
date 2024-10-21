@@ -1,4 +1,3 @@
-// controllers/botController.js
 const { ObjectId } = require('mongodb');
 const RespuestaBot = require('./models/botResponse');
 const Reserva = require('./models/Reserva');
@@ -57,6 +56,39 @@ const obtenerReservas = async (req, res) => {
     }
 };
 
+// Actualizar el estado de confirmación de una reserva
+const actualizarConfirmacionReserva = async (req, res) => {
+    const { id } = req.params; // Obtener el ID de la reserva desde los parámetros
+    const { confirmada } = req.body; // Obtener el nuevo estado de confirmación
+
+    try {
+        const reserva = await Reserva.findByIdAndUpdate(id, { confirmada }, { new: true });
+        if (!reserva) {
+            return res.status(404).json({ message: 'Reserva no encontrada.' });
+        }
+        return res.status(200).json({ message: 'Reserva actualizada exitosamente.', reserva });
+    } catch (error) {
+        console.error('Error al actualizar la reserva:', error);
+        return res.status(500).json({ message: 'Error al actualizar la reserva.' });
+    }
+};
+
+// Eliminar una reserva
+const eliminarReserva = async (req, res) => {
+    const { id } = req.params; // Obtener el ID de la reserva desde los parámetros
+
+    try {
+        const reserva = await Reserva.findByIdAndDelete(id);
+        if (!reserva) {
+            return res.status(404).json({ message: 'Reserva no encontrada.' });
+        }
+        return res.status(200).json({ message: 'Reserva eliminada exitosamente.' });
+    } catch (error) {
+        console.error('Error al eliminar la reserva:', error);
+        return res.status(500).json({ message: 'Error al eliminar la reserva.' });
+    }
+};
+
 ////////////////////// Pedidos //////////////////////////
 
 // Obtener todos los pedidos
@@ -104,7 +136,9 @@ const guardarPedido = async ({ nombre, apellido, pedido, metodo_entrega, direcci
 module.exports = {
     crearReserva,
     obtenerReservas,
-    obtenerPedidos,  // Añadido
+    actualizarConfirmacionReserva,
+    eliminarReserva,
+    obtenerPedidos,
     getQRCode,
     setQRCode,
     guardarPedido
