@@ -3,12 +3,7 @@ const { ObjectId } = require('mongodb');
 const RespuestaBot = require('./models/botResponse');
 const Reserva = require('./models/Reserva');
 const Pedido = require('./models/Pedido');
-const Evento = require('./models/Evento');
-const Horario = require('./models/Horarios');
-const Usuario = require('./models/Usuario');
-const Propina = require('./models/Propina');
-const InventarioCocina = require('./models/InventarioCocina');
-const InventarioBebidas = require('./models/InventarioBebidas');
+// ... otros imports
 
 // Obtener el código QR
 let lastQRCode = '';
@@ -51,7 +46,7 @@ const crearReserva = async (req, res) => {
     }
 };
 
-// Obtener todas las reservas (opcional, para administración)
+// Obtener todas las reservas
 const obtenerReservas = async (req, res) => {
     try {
         const reservas = await Reserva.find();
@@ -63,6 +58,17 @@ const obtenerReservas = async (req, res) => {
 };
 
 ////////////////////// Pedidos //////////////////////////
+
+// Obtener todos los pedidos
+const obtenerPedidos = async (req, res) => {
+    try {
+        const pedidos = await Pedido.find();
+        return res.status(200).json(pedidos);
+    } catch (error) {
+        console.error('Error al obtener pedidos:', error);
+        return res.status(500).json({ message: 'Error al obtener pedidos.' });
+    }
+};
 
 /**
  * Función para guardar un pedido en la base de datos.
@@ -95,6 +101,11 @@ const guardarPedido = async ({ nombre, apellido, pedido, metodo_entrega, direcci
     return newPedido;
 };
 
-
-module.exports = { crearReserva, obtenerReservas, getQRCode, setQRCode, guardarPedido };
-
+module.exports = {
+    crearReserva,
+    obtenerReservas,
+    obtenerPedidos,  // Añadido
+    getQRCode,
+    setQRCode,
+    guardarPedido
+};

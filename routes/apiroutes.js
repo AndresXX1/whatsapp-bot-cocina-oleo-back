@@ -1,7 +1,7 @@
 // routes/apiroutes.js
 const express = require('express');
 const router = express.Router();
-const { getQRCode,crearReserva, obtenerReservas, guardarPedido} = require('../controllers');
+const { getQRCode,crearReserva, obtenerReservas, guardarPedido, obtenerPedidos} = require('../controllers');
 
 
 
@@ -16,5 +16,7 @@ router.post('/reservas', crearReserva);
 router.get('/reservas', obtenerReservas);
 
 router.post('/pedidos', guardarPedido);
+
+router.get('/pedidos', obtenerPedidos);
 
 module.exports = router;
