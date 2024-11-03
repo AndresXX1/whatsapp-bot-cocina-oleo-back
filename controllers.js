@@ -348,6 +348,12 @@ const cambiarEmail = async (req, res) => {
             return res.status(404).json({ message: 'Usuario no encontrado.' });
         }
 
+        // Aquí debes validar la contraseña antes de permitir el cambio de email.
+        const isPasswordValid = await usuario.comparePassword(contraseña); // Asegúrate de tener un método para comparar contraseñas.
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Contraseña incorrecta.' });
+        }
+
         // Cambia el email
         usuario.email = email;
         await usuario.save();
