@@ -11,9 +11,9 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cors({
-    origin: '*',
+    origin: 'http://localhost:3000', // Cambia esto por la URL de tu frontend
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 // Conectar a la base de datos

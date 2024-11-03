@@ -48,7 +48,7 @@ router.delete('/pedidos/:id', eliminarPedido); // Añadido
 // Rutas de usuario
 router.post('/usuarios/registro', registrarUsuario);
 router.post('/usuarios/login', loginUsuario);
-router.get('/usuarios', obtenerUsuarios); // Solo usuarios autenticados
+router.get('/usuarios', authMiddleware, obtenerUsuarios); // Solo usuarios autenticados
 router.put('/usuarios/:id', authMiddleware, modificarUsuario); // Modificar usuario por ID
 
 // Rutas de reseñas
