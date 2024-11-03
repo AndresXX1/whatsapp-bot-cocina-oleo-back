@@ -334,7 +334,7 @@ const cambiarContraseña = async (req, res) => {
 };
 
 const cambiarEmail = async (req, res) => {
-    const { email, contraseña } = req.body; // Recibimos email y currentPassword
+    const { email, contraseña } = req.body; // Recibimos email y contraseña
     const userId = req.user.id; // Asegúrate de que el middleware haya autenticado al usuario
   
     try {
@@ -350,7 +350,7 @@ const cambiarEmail = async (req, res) => {
       }
   
       // Si la contraseña es válida, actualizamos el correo electrónico
-      user.email = email; // Asignamos el nuevo email directamente
+      user.email = email;
       await user.save();
   
       return res.status(200).json({ message: 'Correo electrónico modificado exitosamente.' });
