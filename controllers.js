@@ -221,7 +221,12 @@ const loginUsuario = async (req, res) => {
             nombre: usuario.nombre,      // Agrega el nombre
             apellido: usuario.apellido,   // Agrega el apellido
             telefono: usuario.telefono,   // Agrega el teléfono
-            rol: usuario.rol              // Continúa incluyendo el rol
+            rol: usuario.rol,
+            age: usuario.age,
+            address: usuario.address,
+            country: usuario.country,
+            gender: usuario.gender,
+                      
         }, 'secreto', { expiresIn: '1h' });
 
         res.status(200).json({ token });
