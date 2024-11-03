@@ -334,7 +334,7 @@ const cambiarContraseña = async (req, res) => {
 };
 
 const cambiarEmail = async (req, res) => {
-    const { currentPassword } = req.body; // Solo recibimos la contraseña actual
+    const { email, contraseña } = req.body; // Recibimos email y currentPassword
     const userId = req.user.id; // Asegúrate de que el middleware haya autenticado al usuario
   
     try {
@@ -344,13 +344,13 @@ const cambiarEmail = async (req, res) => {
       }
   
       // Verificamos que la contraseña actual sea correcta
-      const isPasswordValid = await user.comparePassword(currentPassword);
+      const isPasswordValid = await user.comparePassword(contraseña);
       if (!isPasswordValid) {
         return res.status(401).json({ message: 'Contraseña actual incorrecta.' });
       }
   
       // Si la contraseña es válida, actualizamos el correo electrónico
-      user.email = req.body.newEmail; // Asegúrate de que este campo se pase correctamente en el request
+      user.email = email; // Asignamos el nuevo email directamente
       await user.save();
   
       return res.status(200).json({ message: 'Correo electrónico modificado exitosamente.' });
