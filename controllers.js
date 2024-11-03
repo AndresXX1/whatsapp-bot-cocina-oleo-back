@@ -215,7 +215,15 @@ const loginUsuario = async (req, res) => {
             return res.status(401).json({ message: 'Contraseña incorrecta.' });
         }
 
-        const token = jwt.sign({ userId: usuario._id, rol: usuario.rol }, 'secreto', { expiresIn: '1h' });
+        // Aquí es donde se genera el token
+        const token = jwt.sign({
+            userId: usuario._id,
+            nombre: usuario.nombre,      // Agrega el nombre
+            apellido: usuario.apellido,   // Agrega el apellido
+            telefono: usuario.telefono,   // Agrega el teléfono
+            rol: usuario.rol              // Continúa incluyendo el rol
+        }, 'secreto', { expiresIn: '1h' });
+
         res.status(200).json({ token });
     } catch (error) {
         console.error('Error al iniciar sesión:', error);
