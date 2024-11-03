@@ -2,7 +2,10 @@ const { ObjectId } = require('mongodb');
 const RespuestaBot = require('./models/botResponse');
 const Reserva = require('./models/Reserva');
 const Pedido = require('./models/Pedido');
-// ... otros imports
+const Usuario = require('./models/Usuario');
+const Review = require('./models/review');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 // Obtener el código QR
 let lastQRCode = '';
@@ -135,6 +138,7 @@ const eliminarPedido = async (req, res) => {
     }
 };
 
+
 /**
  * Función para guardar un pedido en la base de datos.
  * @param {Object} pedidoData - Datos del pedido.
@@ -166,6 +170,110 @@ const guardarPedido = async ({ nombre, apellido, pedido, metodo_entrega, direcci
     return newPedido;
 };
 
+////////////////////// Usuarios //////////////////////////
+
+
+// Registrar un nuevo usuario
+const registrarUsuario = async (req, res) => {
+    const { nombre, apellido, telefono, email, contraseña, rol } = req.body;
+
+    if (!nombre || !apellido || !telefono || !email || !contraseña) {
+        return res.status(400).json({ message: 'Faltan datos para el registro.' });
+    }
+
+    try {
+        const hashedPassword = await bcrypt.hash(contraseña, 10);
+        const usuario = new Usuario({
+            nombre,
+            apellido,
+            telefono,
+            email,
+            contraseña: hashedPassword,
+            rol: rol || 'cliente'
+        });
+
+        await usuario.save();
+        res.status(201).json({ message: 'Usuario registrado exitosamente.' });
+    } catch (error) {
+        console.error('Error al registrar usuario:', error);
+        res.status(500).json({ message: 'Error al registrar usuario.' });
+    }
+};
+
+// Iniciar sesión de usuario
+const loginUsuario = async (req, res) => {
+    const { email, contraseña } = req.body;
+
+    try {
+        const usuario = await Usuario.findOne({ email });
+        if (!usuario) {
+            return res.status(404).json({ message: 'Usuario no encontrado.' });
+        }
+
+        const validPassword = await bcrypt.compare(contraseña, usuario.contraseña);
+        if (!validPassword) {
+            return res.status(401).json({ message: 'Contraseña incorrecta.' });
+        }
+
+        const token = jwt.sign({ userId: usuario._id, rol: usuario.rol }, 'secreto', { expiresIn: '1h' });
+        res.status(200).json({ token });
+    } catch (error) {
+        console.error('Error al iniciar sesión:', error);
+        res.status(500).json({ message: 'Error al iniciar sesión.' });
+    }
+};
+
+// Obtener todos los usuarios
+const obtenerUsuarios = async (req, res) => {
+    try {
+        const usuarios = await Usuario.find();
+        res.status(200).json(usuarios);
+    } catch (error) {
+        console.error('Error al obtener usuarios:', error);
+        res.status(500).json({ message: 'Error al obtener usuarios.' });
+    }
+};
+
+
+////////////////////// Reseñas //////////////////////////
+
+
+// Crear una nueva reseña
+const crearReview = async (req, res) => {
+    const { nombre, apellido, comentario, calificacion } = req.body;
+
+    if (!nombre || !apellido || !comentario || !calificacion) {
+        return res.status(400).json({ message: 'Faltan datos para la reseña.' });
+    }
+
+    try {
+        const review = new Review({
+            nombre,
+            apellido,
+            comentario,
+            calificacion
+        });
+
+        await review.save();
+        res.status(201).json({ message: 'Reseña creada exitosamente.', review });
+    } catch (error) {
+        console.error('Error al crear la reseña:', error);
+        res.status(500).json({ message: 'Error al crear la reseña.' });
+    }
+};
+
+// Obtener todas las reseñas
+const obtenerReviews = async (req, res) => {
+    try {
+        const reviews = await Review.find();
+        res.status(200).json(reviews);
+    } catch (error) {
+        console.error('Error al obtener reseñas:', error);
+        res.status(500).json({ message: 'Error al obtener reseñas.' });
+    }
+};
+
+
 module.exports = {
     crearReserva,
     obtenerReservas,
@@ -177,4 +285,9 @@ module.exports = {
     guardarPedido,
     eliminarPedido,
     actualizarPedido,
+    registrarUsuario,
+    loginUsuario,
+    obtenerUsuarios,
+    crearReview,
+    obtenerReviews
 };
