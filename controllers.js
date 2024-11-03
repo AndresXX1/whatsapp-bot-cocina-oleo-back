@@ -258,42 +258,49 @@ const modificarUsuario = async (req, res) => {
             return res.status(404).json({ message: 'Usuario no encontrado.' });
         }
 
-        let token;
+        // Actualizar datos del usuario
+        if (nombre) usuario.nombre = nombre;
+        if (apellido) usuario.apellido = apellido;
+        if (telefono) usuario.telefono = telefono;
+        if (email) usuario.email = email; // Actualizar el email
+        if (rol) usuario.rol = rol;
+        if (age) usuario.age = age;
+        if (address) usuario.address = address;
+        if (country) usuario.country = country;
+        if (gender) usuario.gender = gender;
 
-        // Verificar si el email ha cambiado
-        if (email && email !== usuario.email) {
-            usuario.email = email; // Actualizar el email
-            token = jwt.sign({ userId: usuario._id, ...req.body }, 'secreto', { expiresIn: '1h' });
-        }
-
-        // Verificar si la contraseña ha cambiado
-        if (contraseña && !(await bcrypt.compare(contraseña, usuario.contraseña))) {
+        // Verificar y actualizar la contraseña
+        if (contraseña) {
             usuario.contraseña = await bcrypt.hash(contraseña, 10); // Actualizar la contraseña
-            token = jwt.sign({ userId: usuario._id, ...req.body }, 'secreto', { expiresIn: '1h' });
         }
-
-        // Actualizar otros campos sin invalidar el token
-        usuario.nombre = nombre || usuario.nombre;
-        usuario.apellido = apellido || usuario.apellido;
-        usuario.telefono = telefono || usuario.telefono;
-        usuario.rol = rol || usuario.rol;
-        usuario.age = age || usuario.age;
-        usuario.address = address || usuario.address;
-        usuario.country = country || usuario.country;
-        usuario.gender = gender || usuario.gender;
 
         await usuario.save();
+
+        // Generar un nuevo token con los datos actualizados
+        const token = jwt.sign({
+            userId: usuario._id,
+            nombre: usuario.nombre,
+            apellido: usuario.apellido,
+            telefono: usuario.telefono,
+            email: usuario.email,
+            rol: usuario.rol,
+            age: usuario.age,
+            address: usuario.address,
+            country: usuario.country,
+            gender: usuario.gender,
+        }, 'secreto', { expiresIn: '1h' });
 
         res.status(200).json({
             message: 'Usuario actualizado exitosamente.',
             usuario,
-            token // Retorna el nuevo token solo si ha cambiado
+            token // Retorna el nuevo token
         });
     } catch (error) {
         console.error('Error al modificar usuario:', error);
         res.status(500).json({ message: 'Error al modificar usuario.' });
     }
 };
+
 
 
 ////////////////////// Reseñas //////////////////////////
