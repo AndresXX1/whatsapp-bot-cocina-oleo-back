@@ -297,6 +297,27 @@ const obtenerReviews = async (req, res) => {
 };
 
 
+// Actualizar una reseña
+const actualizarReview = async (req, res) => {
+    const { id } = req.params; // Obtener el ID de la reseña desde los parámetros
+    const { comentario } = req.body; // Obtener el comentario del cuerpo de la solicitud
+
+    if (!comentario) {
+        return res.status(400).json({ message: 'Falta el comentario para actualizar la reseña.' });
+    }
+
+    try {
+        const updatedReview = await Review.findByIdAndUpdate(id, { comentario }, { new: true });
+        if (!updatedReview) {
+            return res.status(404).json({ message: 'Reseña no encontrada.' });
+        }
+        res.status(200).json({ message: 'Reseña actualizada exitosamente.', review: updatedReview });
+    } catch (error) {
+        console.error('Error al actualizar la reseña:', error);
+        res.status(500).json({ message: 'Error al actualizar la reseña.' });
+    }
+};
+
 module.exports = {
     crearReserva,
     obtenerReservas,

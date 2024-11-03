@@ -54,5 +54,6 @@ router.put('/usuarios/:id', authMiddleware, modificarUsuario); // Modificar usua
 // Rutas de reseñas
 router.post('/reviews', crearReview);
 router.get('/reviews', obtenerReviews);
+router.put('/reviews/:id', actualizarReview);
 
 module.exports = router;
