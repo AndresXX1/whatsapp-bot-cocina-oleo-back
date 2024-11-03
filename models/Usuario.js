@@ -11,6 +11,10 @@ const usuarioSchema = new mongoose.Schema({
         enum: ['cliente', 'admin', 'cocinero', 'encargado', 'superAdmin'], 
         default: 'cliente' 
     },
+    age: { type: Number, required: false },         // Edad
+    address: { type: String, required: false },     // Dirección
+    country: { type: String, required: false },     // País
+    gender: { type: String, required: false },      // Género
     fechaCreacion: { type: Date, default: Date.now }
 }, { timestamps: true });
 
