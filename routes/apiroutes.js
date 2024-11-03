@@ -54,7 +54,7 @@ router.post('/usuarios/login', loginUsuario);
 router.get('/usuarios', authMiddleware, obtenerUsuarios); // Solo usuarios autenticados
 router.put('/usuarios/:id', authMiddleware, modificarUsuario); // Modificar usuario por ID
 router.put('/usuarios/:id/cambiar-contra', cambiarContraseña);
-router.put('/cambiar-email', authMiddleware, cambiarEmail);
+router.put('/cambiar-email', cambiarEmail);
 // Rutas de reseñas
 router.post('/reviews', crearReview);
 router.get('/reviews', obtenerReviews);

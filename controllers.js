@@ -334,29 +334,21 @@ const cambiarContraseña = async (req, res) => {
 };
 
 const cambiarEmail = async (req, res) => {
+    const { id } = req.params;
+    const { email, contraseña } = req.body;
+
     try {
-        const { email, contraseña } = req.body;
-        const userId = req.user.id;
-
-        const user = await Usuario.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: 'Usuario no encontrado.' });
+        const usuario = await Usuario.findByIdAndUpdate(id, { email }, { new: true });
+        if (!usuario) {
+            return res.status(404).send("Usuario no encontrado");
         }
-
-        const isPasswordValid = await user.comparePassword(contraseña);
-        if (!isPasswordValid) {
-            return res.status(401).json({ message: 'Contraseña actual incorrecta.' });
-        }
-
-        user.email = email;
-        await user.save();
-
-        return res.status(200).json({ message: 'Correo electrónico modificado exitosamente.' });
+        res.status(200).send("Email actualizado correctamente");
     } catch (error) {
-        console.error('Error al modificar el usuario:', error);
-        return res.status(500).json({ message: 'Error interno del servidor.' });
+        console.error("Error al modificar usuario:", error);
+        res.status(500).send("Error en la modificación del usuario");
     }
-};
+}
+
 
 ////////////////////// Reseñas //////////////////////////
 
