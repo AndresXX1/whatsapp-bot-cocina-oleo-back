@@ -18,7 +18,7 @@ const client = new Client({
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
     },
     puppeteerPoolOptions: {
-        timeout: 600000 // 10 minutos en milisegundos
+        timeout: 6000 // 10 minutos en milisegundos
     }
 });
 
