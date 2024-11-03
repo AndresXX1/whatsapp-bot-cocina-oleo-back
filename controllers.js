@@ -3,7 +3,7 @@ const RespuestaBot = require('./models/botResponse');
 const Reserva = require('./models/Reserva');
 const Pedido = require('./models/Pedido');
 const Usuario = require('./models/Usuario');
-const Review = require('./models/review');
+const Review = require('./models/reviews');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 

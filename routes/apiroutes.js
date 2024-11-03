@@ -1,6 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const { getQRCode, crearReserva, obtenerReservas, actualizarConfirmacionReserva, eliminarReserva, guardarPedido, obtenerPedidos, actualizarPedido, eliminarPedido } = require('../controllers');
+const { getQRCode, crearReserva, obtenerReservas,
+     actualizarConfirmacionReserva,
+      eliminarReserva,
+       guardarPedido,
+        obtenerPedidos,
+         actualizarPedido,
+          eliminarPedido,
+          registrarUsuario,
+          loginUsuario,
+          obtenerUsuarios,
+          crearReview,
+          obtenerReviews,
+        } = require('../controllers');
+const authMiddleware = require('../Middlewares/auth');
+
 
 // Ruta para obtener el código QR
 router.get('/get-qr', getQRCode);
@@ -28,5 +42,15 @@ router.put('/pedidos/:id', actualizarPedido); // Añadido
 
 // Ruta para eliminar un pedido
 router.delete('/pedidos/:id', eliminarPedido); // Añadido
+
+
+// Rutas de usuario
+router.post('/usuarios/registro', registrarUsuario);
+router.post('/usuarios/login', loginUsuario);
+router.get('/usuarios', authMiddleware, obtenerUsuarios); // Solo usuarios autenticados
+
+// Rutas de reseñas
+router.post('/reviews', crearReview);
+router.get('/reviews', obtenerReviews);
 
 module.exports = router;

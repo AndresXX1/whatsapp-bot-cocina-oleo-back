@@ -1,17 +1,24 @@
 const dialogflow = require('@google-cloud/dialogflow');
+const fs = require('fs');
 require('dotenv').config();
 
-// Verificar que la variable de entorno esté definida
-if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-    throw new Error('La variable de entorno GOOGLE_APPLICATION_CREDENTIALS_JSON no está definida.');
-}
-
-// Parsear las credenciales desde la variable de entorno
+// Verificar que la variable de entorno GOOGLE_APPLICATION_CREDENTIALS esté definida
 let credentials;
 try {
-    credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+    // Intentar obtener las credenciales de la variable de entorno
+    const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+    
+    if (!credentialsPath) {
+        throw new Error('La variable de entorno GOOGLE_APPLICATION_CREDENTIALS no está definida.');
+    }
+
+    // Leer las credenciales desde el archivo
+    const credentialsData = fs.readFileSync(credentialsPath, 'utf8');
+    credentials = JSON.parse(credentialsData);
 } catch (error) {
-    console.error('Error al parsear GOOGLE_APPLICATION_CREDENTIALS_JSON:', error);
+    console.error('Error al leer o parsear las credenciales:', error);
+    
+    // Aquí podrías decidir cómo manejar el error, pero asegurémonos de que se lance si no hay credenciales
     throw error;
 }
 
