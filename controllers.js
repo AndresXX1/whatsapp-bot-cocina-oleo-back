@@ -303,7 +303,35 @@ const modificarUsuario = async (req, res) => {
     }
 };
 
+//cambio de password
 
+const cambiarContraseña = async (req, res) => {
+    const { id } = req.params; // ID del usuario a modificar
+    const { currentPassword, newPassword } = req.body;
+
+    try {
+        const usuario = await Usuario.findById(id);
+        if (!usuario) {
+            return res.status(404).json({ message: 'Usuario no encontrado.' });
+        }
+
+        // Verificar la contraseña actual
+        const passwordMatch = await bcrypt.compare(currentPassword, usuario.contraseña);
+        if (!passwordMatch) {
+            return res.status(400).json({ message: 'La contraseña actual es incorrecta.' });
+        }
+
+        // Actualizar la contraseña
+        usuario.contraseña = await bcrypt.hash(newPassword, 10);
+        await usuario.save();
+
+        // Realizar logout (podrías implementar esto según tu lógica de sesión)
+        res.status(200).json({ message: 'Contraseña cambiada exitosamente. Por favor, vuelve a iniciar sesión.' });
+    } catch (error) {
+        console.error('Error al cambiar la contraseña:', error);
+        res.status(500).json({ message: 'Error al cambiar la contraseña.' });
+    }
+};
 
 ////////////////////// Reseñas //////////////////////////
 
@@ -382,5 +410,6 @@ module.exports = {
     crearReview,
     obtenerReviews,
     modificarUsuario,
-    actualizarReview
+    actualizarReview,
+    cambiarContraseña
 };
