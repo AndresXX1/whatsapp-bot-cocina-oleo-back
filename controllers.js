@@ -334,5 +334,6 @@ module.exports = {
     obtenerUsuarios,
     crearReview,
     obtenerReviews,
-    modificarUsuario
+    modificarUsuario,
+    actualizarReview
 };

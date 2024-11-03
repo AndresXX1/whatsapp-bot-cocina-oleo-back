@@ -13,6 +13,7 @@ const { getQRCode, crearReserva, obtenerReservas,
           crearReview,
           obtenerReviews,
           modificarUsuario,
+          actualizarReview
         } = require('../controllers');
 const authMiddleware = require('../Middlewares/auth');
 
