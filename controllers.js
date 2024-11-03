@@ -226,6 +226,7 @@ const loginUsuario = async (req, res) => {
             address: usuario.address,
             country: usuario.country,
             gender: usuario.gender,
+            imagen: usuario.imagen
                       
         }, 'secreto', { expiresIn: '1h' });
 
