@@ -333,6 +333,28 @@ const cambiarContraseña = async (req, res) => {
     }
 };
 
+const cambiarEmail = async (req, res) => {
+    const { newEmail, currentPassword } = req.body;
+    const userId = req.user.id; // Obtiene el ID desde el middleware
+  
+    try {
+      const user = await User.findById(userId);
+      if (!user) return res.status(404).json({ message: 'Usuario no encontrado.' });
+  
+      // Verifica la contraseña actual
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) return res.status(400).json({ message: 'Contraseña actual incorrecta.' });
+  
+      // Cambia el correo electrónico
+      user.email = newEmail;
+      await user.save();
+  
+      res.status(200).json({ message: 'Email actualizado exitosamente.' });
+    } catch (error) {
+      res.status(500).json({ message: 'Error al actualizar el email.', error });
+    }
+  };
+
 ////////////////////// Reseñas //////////////////////////
 
 
@@ -360,30 +382,6 @@ const crearReview = async (req, res) => {
     }
 };
 
-//cambio de email
-
-const cambiarEmail = async (req, res) => {
-    const { newEmail, currentPassword } = req.body;
-    const userId = req.user.id; // Suponiendo que tienes el ID del usuario en el token
-  
-    try {
-      const user = await User.findById(userId);
-  
-      // Verificar la contraseña actual
-      const isMatch = await bcrypt.compare(currentPassword, user.password);
-      if (!isMatch) {
-        return res.status(400).json({ message: 'Contraseña actual incorrecta.' });
-      }
-  
-      // Actualizar el email
-      user.email = newEmail;
-      await user.save();
-  
-      res.status(200).json({ message: 'Email actualizado exitosamente.' });
-    } catch (error) {
-      res.status(500).json({ message: 'Error al actualizar el email.', error });
-    }
-  };
 
 // Obtener todas las reseñas
 const obtenerReviews = async (req, res) => {
