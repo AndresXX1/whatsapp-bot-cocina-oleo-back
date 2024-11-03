@@ -334,31 +334,29 @@ const cambiarContraseña = async (req, res) => {
 };
 
 const cambiarEmail = async (req, res) => {
-    const { email, contraseña } = req.body; // Recibimos email y contraseña
-    const userId = req.user.id; // Asegúrate de que el middleware haya autenticado al usuario
-  
     try {
-      const user = await Usuario.findById(userId);
-      if (!user) {
-        return res.status(404).json({ message: 'Usuario no encontrado.' });
-      }
-  
-      // Verificamos que la contraseña actual sea correcta
-      const isPasswordValid = await user.comparePassword(contraseña);
-      if (!isPasswordValid) {
-        return res.status(401).json({ message: 'Contraseña actual incorrecta.' });
-      }
-  
-      // Si la contraseña es válida, actualizamos el correo electrónico
-      user.email = email;
-      await user.save();
-  
-      return res.status(200).json({ message: 'Correo electrónico modificado exitosamente.' });
+        const { email, contraseña } = req.body;
+        const userId = req.user.id;
+
+        const user = await Usuario.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado.' });
+        }
+
+        const isPasswordValid = await user.comparePassword(contraseña);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Contraseña actual incorrecta.' });
+        }
+
+        user.email = email;
+        await user.save();
+
+        return res.status(200).json({ message: 'Correo electrónico modificado exitosamente.' });
     } catch (error) {
-      console.error('Error al modificar el usuario:', error);
-      return res.status(500).json({ message: 'Error al modificar usuario.' });
+        console.error('Error al modificar el usuario:', error);
+        return res.status(500).json({ message: 'Error interno del servidor.' });
     }
-  };
+};
 
 ////////////////////// Reseñas //////////////////////////
 
