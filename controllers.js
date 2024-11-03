@@ -250,20 +250,45 @@ const obtenerUsuarios = async (req, res) => {
 // Modificar datos del usuario
 const modificarUsuario = async (req, res) => {
     const { id } = req.params;
-    const { nombre, apellido, telefono, email, rol, age, address,country,gender,fechaCreacion } = req.body;
+    const { nombre, apellido, telefono, email, rol, age, address, country, gender, contraseña } = req.body;
 
     try {
-        const usuario = await Usuario.findByIdAndUpdate(
-            id,
-            { nombre, apellido, telefono, email, rol, age, address,country,gender,fechaCreacion },
-            { new: true, runValidators: true } // Devuelve el documento actualizado y valida los datos
-        );
-
+        const usuario = await Usuario.findById(id);
         if (!usuario) {
             return res.status(404).json({ message: 'Usuario no encontrado.' });
         }
 
-        res.status(200).json({ message: 'Usuario actualizado exitosamente.', usuario });
+        let token;
+
+        // Verificar si el email ha cambiado
+        if (email && email !== usuario.email) {
+            usuario.email = email; // Actualizar el email
+            token = jwt.sign({ userId: usuario._id, ...req.body }, 'secreto', { expiresIn: '1h' });
+        }
+
+        // Verificar si la contraseña ha cambiado
+        if (contraseña && !(await bcrypt.compare(contraseña, usuario.contraseña))) {
+            usuario.contraseña = await bcrypt.hash(contraseña, 10); // Actualizar la contraseña
+            token = jwt.sign({ userId: usuario._id, ...req.body }, 'secreto', { expiresIn: '1h' });
+        }
+
+        // Actualizar otros campos sin invalidar el token
+        usuario.nombre = nombre || usuario.nombre;
+        usuario.apellido = apellido || usuario.apellido;
+        usuario.telefono = telefono || usuario.telefono;
+        usuario.rol = rol || usuario.rol;
+        usuario.age = age || usuario.age;
+        usuario.address = address || usuario.address;
+        usuario.country = country || usuario.country;
+        usuario.gender = gender || usuario.gender;
+
+        await usuario.save();
+
+        res.status(200).json({
+            message: 'Usuario actualizado exitosamente.',
+            usuario,
+            token // Retorna el nuevo token solo si ha cambiado
+        });
     } catch (error) {
         console.error('Error al modificar usuario:', error);
         res.status(500).json({ message: 'Error al modificar usuario.' });
