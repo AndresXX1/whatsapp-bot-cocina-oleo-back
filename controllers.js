@@ -234,6 +234,29 @@ const obtenerUsuarios = async (req, res) => {
     }
 };
 
+// Modificar datos del usuario
+const modificarUsuario = async (req, res) => {
+    const { id } = req.params;
+    const { nombre, apellido, telefono, email, rol } = req.body;
+
+    try {
+        const usuario = await Usuario.findByIdAndUpdate(
+            id,
+            { nombre, apellido, telefono, email, rol },
+            { new: true, runValidators: true } // Devuelve el documento actualizado y valida los datos
+        );
+
+        if (!usuario) {
+            return res.status(404).json({ message: 'Usuario no encontrado.' });
+        }
+
+        res.status(200).json({ message: 'Usuario actualizado exitosamente.', usuario });
+    } catch (error) {
+        console.error('Error al modificar usuario:', error);
+        res.status(500).json({ message: 'Error al modificar usuario.' });
+    }
+};
+
 
 ////////////////////// Reseñas //////////////////////////
 
@@ -289,5 +312,6 @@ module.exports = {
     loginUsuario,
     obtenerUsuarios,
     crearReview,
-    obtenerReviews
+    obtenerReviews,
+    modificarUsuario
 };

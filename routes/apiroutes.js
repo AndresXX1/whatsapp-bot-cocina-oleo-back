@@ -12,6 +12,7 @@ const { getQRCode, crearReserva, obtenerReservas,
           obtenerUsuarios,
           crearReview,
           obtenerReviews,
+          modificarUsuario,
         } = require('../controllers');
 const authMiddleware = require('../Middlewares/auth');
 
@@ -48,6 +49,7 @@ router.delete('/pedidos/:id', eliminarPedido); // Añadido
 router.post('/usuarios/registro', registrarUsuario);
 router.post('/usuarios/login', loginUsuario);
 router.get('/usuarios', authMiddleware, obtenerUsuarios); // Solo usuarios autenticados
+router.put('/usuarios/:id', authMiddleware, modificarUsuario); // Modificar usuario por ID
 
 // Rutas de reseñas
 router.post('/reviews', crearReview);
