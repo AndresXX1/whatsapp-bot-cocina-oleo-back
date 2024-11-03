@@ -334,20 +334,30 @@ const cambiarContraseña = async (req, res) => {
 };
 
 const cambiarEmail = async (req, res) => {
-    const { id } = req.params;
     const { email, contraseña } = req.body;
+    const usuarioId = req.user.id; // Suponiendo que tienes el ID del usuario en el token
+
+    if (!mongoose.Types.ObjectId.isValid(usuarioId)) {
+        return res.status(400).json({ message: 'ID de usuario no válido.' });
+    }
 
     try {
-        const usuario = await Usuario.findByIdAndUpdate(id, { email }, { new: true });
+        // Verifica la contraseña (implementa tu lógica de verificación aquí)
+        const usuario = await Usuario.findById(usuarioId);
         if (!usuario) {
-            return res.status(404).send("Usuario no encontrado");
+            return res.status(404).json({ message: 'Usuario no encontrado.' });
         }
-        res.status(200).send("Email actualizado correctamente");
+
+        // Cambia el email
+        usuario.email = email;
+        await usuario.save();
+
+        res.status(200).json({ message: 'Correo electrónico cambiado exitosamente.' });
     } catch (error) {
-        console.error("Error al modificar usuario:", error);
-        res.status(500).send("Error en la modificación del usuario");
+        console.error('Error al modificar usuario:', error);
+        res.status(500).json({ message: 'Error al cambiar el correo electrónico.' });
     }
-}
+};
 
 
 ////////////////////// Reseñas //////////////////////////
