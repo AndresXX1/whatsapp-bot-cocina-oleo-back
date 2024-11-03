@@ -245,12 +245,12 @@ const obtenerUsuarios = async (req, res) => {
 // Modificar datos del usuario
 const modificarUsuario = async (req, res) => {
     const { id } = req.params;
-    const { nombre, apellido, telefono, email, rol } = req.body;
+    const { nombre, apellido, telefono, email, rol, age, address,country,gender,fechaCreacion } = req.body;
 
     try {
         const usuario = await Usuario.findByIdAndUpdate(
             id,
-            { nombre, apellido, telefono, email, rol },
+            { nombre, apellido, telefono, email, rol, age, address,country,gender,fechaCreacion },
             { new: true, runValidators: true } // Devuelve el documento actualizado y valida los datos
         );
 
