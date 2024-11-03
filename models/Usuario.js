@@ -11,11 +11,12 @@ const usuarioSchema = new mongoose.Schema({
         enum: ['cliente', 'admin', 'cocinero', 'encargado', 'superAdmin'], 
         default: 'cliente' 
     },
-    age: { type: Number, required: false },         // Edad
-    address: { type: String, required: false },     // Dirección
-    country: { type: String, required: false },     // País
-    gender: { type: String, required: false },      // Género
-    fechaCreacion: { type: Date, default: Date.now }
+    age: { type: Number, required: false },
+    address: { type: String, required: false },
+    country: { type: String, required: false },
+    gender: { type: String, required: false },
+    fechaCreacion: { type: Date, default: Date.now },
+    imagen: { type: String, required: false } // Nuevo campo para la imagen
 }, { timestamps: true });
 
 module.exports = mongoose.model('Usuario', usuarioSchema);

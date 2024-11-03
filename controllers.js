@@ -250,7 +250,7 @@ const obtenerUsuarios = async (req, res) => {
 // Modificar datos del usuario
 const modificarUsuario = async (req, res) => {
     const { id } = req.params;
-    const { nombre, apellido, telefono, email, rol, age, address, country, gender, contraseña } = req.body;
+    const { nombre, apellido, telefono, email, rol, age, address, country, gender, contraseña, imagen } = req.body;
 
     try {
         const usuario = await Usuario.findById(id);
@@ -262,21 +262,21 @@ const modificarUsuario = async (req, res) => {
         if (nombre) usuario.nombre = nombre;
         if (apellido) usuario.apellido = apellido;
         if (telefono) usuario.telefono = telefono;
-        if (email) usuario.email = email; // Actualizar el email
+        if (email) usuario.email = email; 
         if (rol) usuario.rol = rol;
         if (age) usuario.age = age;
         if (address) usuario.address = address;
         if (country) usuario.country = country;
         if (gender) usuario.gender = gender;
+        if (imagen) usuario.imagen = imagen; // Actualizar la imagen
 
         // Verificar y actualizar la contraseña
         if (contraseña) {
-            usuario.contraseña = await bcrypt.hash(contraseña, 10); // Actualizar la contraseña
+            usuario.contraseña = await bcrypt.hash(contraseña, 10);
         }
 
         await usuario.save();
 
-        // Generar un nuevo token con los datos actualizados
         const token = jwt.sign({
             userId: usuario._id,
             nombre: usuario.nombre,
@@ -288,12 +288,13 @@ const modificarUsuario = async (req, res) => {
             address: usuario.address,
             country: usuario.country,
             gender: usuario.gender,
+            imagen: usuario.imagen, // Incluir la imagen en el token
         }, 'secreto', { expiresIn: '1h' });
 
         res.status(200).json({
             message: 'Usuario actualizado exitosamente.',
             usuario,
-            token // Retorna el nuevo token
+            token
         });
     } catch (error) {
         console.error('Error al modificar usuario:', error);
