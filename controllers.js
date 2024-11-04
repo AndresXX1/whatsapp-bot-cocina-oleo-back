@@ -367,24 +367,33 @@ const cambiarEmail = async (req, res) => {
     const { email, contraseña } = req.body;
     const usuarioId = req.user.userId; // Asegúrate de que 'userId' sea correcto.
 
-    try {
-        console.log(`Verificando contraseña para el usuario ID: ${usuarioId}`);
-        const contraseñaValida = await verificarContraseña(usuarioId, contraseña);
+    if (!email || !contraseña) {
+        return res.status(400).json({ message: 'Faltan datos para cambiar el correo electrónico.' });
+    }
 
+    try {
+        // Verificar la contraseña actual
+        const contraseñaValida = await verificarContraseña(usuarioId, contraseña);
         if (!contraseñaValida) {
-            console.log('Contraseña incorrecta');
-            return res.status(403).json({ message: 'Contraseña incorrecta' });
+            return res.status(403).json({ message: 'Contraseña incorrecta.' });
         }
 
+        // Verificar si el nuevo email ya está en uso
+        const emailExistente = await Usuario.findOne({ email });
+        if (emailExistente) {
+            return res.status(400).json({ message: 'El correo electrónico ya está en uso.' });
+        }
+
+        // Actualizar el email del usuario
         const usuarioActualizado = await actualizarEmail(usuarioId, email);
         if (!usuarioActualizado) {
-            return res.status(400).json({ message: 'Error al cambiar el correo electrónico' });
+            return res.status(400).json({ message: 'Error al cambiar el correo electrónico.' });
         }
 
-        return res.status(200).json({ message: 'Correo electrónico cambiado exitosamente' });
+        return res.status(200).json({ message: 'Correo electrónico cambiado exitosamente.' });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Error interno del servidor' });
+        console.error('Error al cambiar el correo electrónico:', error);
+        return res.status(500).json({ message: 'Error interno del servidor.' });
     }
 };
 ////////////////////// Reseñas //////////////////////////
