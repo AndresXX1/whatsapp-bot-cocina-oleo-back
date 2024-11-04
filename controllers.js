@@ -345,10 +345,11 @@ const validarToken = (token) => {
 
 // Función para verificar la contraseña del usuario
 const verificarContraseña = async (userId, contraseña) => {
-    const user = await Usuario.findById(userId); // Asegúrate de que estás usando el modelo correcto
+    const user = await Usuario.findById(userId);
     if (!user) return false;
 
-    return bcrypt.compare(contraseña, user.contraseña); // Compara la contraseña proporcionada con la almacenada
+    // Asegúrate de que el campo de contraseña en la base de datos se llama correctamente
+    return await bcrypt.compare(contraseña, user.contraseña);
 };
 
 // Función para actualizar el email del usuario
@@ -360,12 +361,14 @@ const actualizarEmail = async (userId, email) => {
 // Controlador para cambiar el email del usuario
 const cambiarEmail = async (req, res) => {
     const { email, contraseña } = req.body;
-    const usuarioId = req.user.id; // Extrae el ID del usuario del token
+    const usuarioId = req.user.id;
 
     try {
+        console.log(`Verificando contraseña para el usuario ID: ${usuarioId}`);
         const contraseñaValida = await verificarContraseña(usuarioId, contraseña);
 
         if (!contraseñaValida) {
+            console.log('Contraseña incorrecta');
             return res.status(403).json({ message: 'Contraseña incorrecta' });
         }
 
