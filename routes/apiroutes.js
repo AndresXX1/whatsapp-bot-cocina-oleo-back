@@ -54,7 +54,7 @@ router.post('/usuarios/login', loginUsuario);
 router.get('/usuarios', authMiddleware, obtenerUsuarios); // Solo usuarios autenticados
 router.put('/usuarios/:id', authMiddleware, modificarUsuario); // Modificar usuario por ID
 router.put('/usuarios/:id/cambiar-contra', cambiarContraseña);
-app.put('/api/cambiar-email', async (req, res) => {
+router.put('/api/cambiar-email', async (req, res) => {
   try {
     const result = await cambiarEmail(req);
     return res.json(result);
