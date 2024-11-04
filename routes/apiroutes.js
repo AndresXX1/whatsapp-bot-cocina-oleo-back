@@ -57,6 +57,7 @@ router.put('/usuarios/:id/cambiar-contra', cambiarContraseña);
 router.put('/api/cambiar-email', async (req, res) => {
   try {
     const result = await cambiarEmail(req);
+    console.log('Respuesta:', result); // Agrega esto para debuggear
     return res.json(result);
   } catch (error) {
     console.error('Error al cambiar el email:', error);

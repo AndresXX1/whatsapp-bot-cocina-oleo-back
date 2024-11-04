@@ -390,7 +390,10 @@ const cambiarEmail = async (req, res) => {
             return res.status(400).json({ message: 'Error al cambiar el correo electrónico.' });
         }
 
-        return res.status(200).json({ message: 'Correo electrónico cambiado exitosamente.' });
+        return res.json({ 
+            success: true,
+            message: 'Correo electrónico cambiado exitosamente.'
+          });
     } catch (error) {
         console.error('Error al cambiar el correo electrónico:', error);
         return res.status(500).json({ message: 'Error interno del servidor.' });
