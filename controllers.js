@@ -348,12 +348,12 @@ const verificarContraseña = async (userId, contraseña) => {
     const user = await Usuario.findById(userId);
     if (!user) return false; // Si no se encuentra al usuario, retorna false.
 
+    console.log('Contraseña ingresada:', contraseña);
+    console.log('Contraseña hasheada en la base de datos:', user.contraseña);
     // Compara la contraseña ingresada con la contraseña hasheada en la base de datos.
     return await bcrypt.compare(contraseña, user.contraseña);
 };
 
-console.log('Contraseña ingresada:', contraseña);
-console.log('Contraseña hasheada en la base de datos:', user.contraseña);
 
 // Función para actualizar el email del usuario
 const actualizarEmail = async (userId, email) => {
