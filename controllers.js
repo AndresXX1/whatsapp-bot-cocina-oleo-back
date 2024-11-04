@@ -333,6 +333,7 @@ const cambiarContraseña = async (req, res) => {
     }
 };
 
+// Función para validar el token JWT
 const validarToken = (token) => {
     try {
         const decoded = jwt.verify(token, 'secreto'); // Usa la misma clave que usas para firmar el token
@@ -342,21 +343,23 @@ const validarToken = (token) => {
     }
 };
 
+// Función para verificar la contraseña del usuario
 const verificarContraseña = async (userId, contraseña) => {
-    const user = await User.findById(userId); // Asegúrate de que tienes un método para buscar el usuario
+    const user = await Usuario.findById(userId); // Asegúrate de que estás usando el modelo correcto
     if (!user) return false;
 
     return bcrypt.compare(contraseña, user.contraseña); // Compara la contraseña proporcionada con la almacenada
 };
 
+// Función para actualizar el email del usuario
 const actualizarEmail = async (userId, email) => {
-    const user = await User.findByIdAndUpdate(userId, { email }, { new: true }); // Actualiza el email del usuario
+    const user = await Usuario.findByIdAndUpdate(userId, { email }, { new: true }); // Actualiza el email del usuario
     return user;
 };
 
+// Controlador para cambiar el email del usuario
 const cambiarEmail = async (req, res) => {
     const { email, contraseña } = req.body;
-
     const usuarioId = req.user.id; // Extrae el ID del usuario del token
 
     try {
@@ -377,7 +380,6 @@ const cambiarEmail = async (req, res) => {
         return res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
-
 
 ////////////////////// Reseñas //////////////////////////
 
@@ -460,4 +462,7 @@ module.exports = {
     actualizarReview,
     cambiarContraseña,
     cambiarEmail,
+    validarToken,
+    verificarContraseña,
+    actualizarEmail,
 };
