@@ -349,6 +349,7 @@ const verificarContraseña = async (userId, contraseña) => {
     if (!user) return false; // Si no se encuentra al usuario, retorna false.
 
     console.log('Contraseña ingresada:', contraseña);
+   
     console.log('Contraseña hasheada en la base de datos:', user.contraseña);
     // Compara la contraseña ingresada con la contraseña hasheada en la base de datos.
     return await bcrypt.compare(contraseña, user.contraseña);
@@ -364,7 +365,7 @@ const actualizarEmail = async (userId, email) => {
 // Controlador para cambiar el email del usuario
 const cambiarEmail = async (req, res) => {
     const { email, contraseña } = req.body;
-    const usuarioId = req.user.id;
+    const usuarioId = req.user.userId; // Asegúrate de que 'userId' sea correcto.
 
     try {
         console.log(`Verificando contraseña para el usuario ID: ${usuarioId}`);
@@ -386,7 +387,6 @@ const cambiarEmail = async (req, res) => {
         return res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
-
 ////////////////////// Reseñas //////////////////////////
 
 
