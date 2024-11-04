@@ -57,10 +57,9 @@ router.put('/usuarios/:id/cambiar-contra', cambiarContraseña);
 router.put('/api/cambiar-email', async (req, res) => {
   try {
     const result = await cambiarEmail(req);
-    console.log('Respuesta:', result); // Agrega esto para debuggear
-    return res.json(result);
+    return res.json(result); // Asegúrate de que esto está devolviendo un objeto JSON
   } catch (error) {
-    console.error('Error al cambiar el email:', error);
+    console.error('Error interno del servidor:', error);
     return res.status(500).json({ message: 'Error interno del servidor.' });
   }
 });
