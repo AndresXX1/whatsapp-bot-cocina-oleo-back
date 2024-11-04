@@ -54,15 +54,7 @@ router.post('/usuarios/login', loginUsuario);
 router.get('/usuarios', authMiddleware, obtenerUsuarios); // Solo usuarios autenticados
 router.put('/usuarios/:id', authMiddleware, modificarUsuario); // Modificar usuario por ID
 router.put('/usuarios/:id/cambiar-contra', cambiarContraseña);
-router.put('/cambiar-email', async (req, res) => {
-  try {
-    const result = await cambiarEmail(req);
-    return res.json(result); // Asegúrate de que esto está devolviendo un objeto JSON
-  } catch (error) {
-    console.error('Error interno del servidor:', error);
-    return res.status(500).json({ message: 'Error interno del servidor.' });
-  }
-});
+router.put('/cambiar-email', authMiddleware, cambiarEmail);
 // Rutas de reseñas
 router.post('/reviews', crearReview);
 router.get('/reviews', obtenerReviews);
