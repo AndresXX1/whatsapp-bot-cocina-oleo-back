@@ -365,7 +365,7 @@ const actualizarEmail = async (userId, email) => {
 // Controlador para cambiar el email del usuario
 const cambiarEmail = async (req, res) => {
     const { email, contraseña } = req.body;
-    const usuarioId = req.user.userId; // Asegúrate de que 'userId' sea correcto.
+    const usuarioId = req.user.userId;
 
     if (!email || !contraseña) {
         return res.status(400).json({ message: 'Faltan datos para cambiar el correo electrónico.' });
@@ -380,12 +380,12 @@ const cambiarEmail = async (req, res) => {
 
         // Verificar si el nuevo email ya está en uso
         const emailExistente = await Usuario.findOne({ email });
-        if (emailExistente) {
+        if (emailExistente && emailExistente._id.toString() !== usuarioId) {
             return res.status(400).json({ message: 'El correo electrónico ya está en uso.' });
         }
 
         // Actualizar el email del usuario
-        const usuarioActualizado = await actualizarEmail(usuarioId, email);
+        const usuarioActualizado = await Usuario.findByIdAndUpdate(usuarioId, { email }, { new: true });
         if (!usuarioActualizado) {
             return res.status(400).json({ message: 'Error al cambiar el correo electrónico.' });
         }
