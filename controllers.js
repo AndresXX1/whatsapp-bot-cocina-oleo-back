@@ -333,39 +333,17 @@ const cambiarContraseña = async (req, res) => {
     }
 };
 
-// Función para validar el token JWT
-const validarToken = (token) => {
-    try {
-        const decoded = jwt.verify(token, 'secreto'); // Usa la misma clave que usas para firmar el token
-        return decoded;
-    } catch (error) {
-        return null; // Si no es válido, retorna null
-    }
-};
-
 // Función para verificar la contraseña del usuario
 const verificarContraseña = async (userId, contraseña) => {
-    const user = await Usuario.findById(userId);
-    if (!user) return false; // Si no se encuentra al usuario, retorna false.
-
-    console.log('Contraseña ingresada:', contraseña);
-   
-    console.log('Contraseña hasheada en la base de datos:', user.contraseña);
-    // Compara la contraseña ingresada con la contraseña hasheada en la base de datos.
-    return await bcrypt.compare(contraseña, user.contraseña);
+    const usuario = await Usuario.findById(userId);
+    if (!usuario) return false;
+    return await bcrypt.compare(contraseña, usuario.contraseña);
 };
 
-
-// Función para actualizar el email del usuario
-const actualizarEmail = async (userId, email) => {
-    const user = await Usuario.findByIdAndUpdate(userId, { email }, { new: true }); // Actualiza el email del usuario
-    return user;
-};
-
-// Controlador para cambiar el email del usuario
+// Controlador para cambiar el correo electrónico
 const cambiarEmail = async (req, res) => {
     const { email, contraseña } = req.body;
-    const usuarioId = req.user.userId;
+    const usuarioId = req.user.userId; // Asegúrate de que el middleware de autenticación esté configurado
 
     if (!email || !contraseña) {
         return res.status(400).json({ message: 'Faltan datos para cambiar el correo electrónico.' });
@@ -393,7 +371,7 @@ const cambiarEmail = async (req, res) => {
         return res.json({ 
             success: true,
             message: 'Correo electrónico cambiado exitosamente.'
-          });
+        });
     } catch (error) {
         console.error('Error al cambiar el correo electrónico:', error);
         return res.status(500).json({ message: 'Error interno del servidor.' });
@@ -480,7 +458,5 @@ module.exports = {
     actualizarReview,
     cambiarContraseña,
     cambiarEmail,
-    validarToken,
     verificarContraseña,
-    actualizarEmail,
 };
