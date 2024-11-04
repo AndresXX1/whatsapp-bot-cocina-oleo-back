@@ -333,35 +333,48 @@ const cambiarContraseña = async (req, res) => {
     }
 };
 
+const validarToken = (token) => {
+    try {
+        const decoded = jwt.verify(token, 'secreto'); // Usa la misma clave que usas para firmar el token
+        return decoded;
+    } catch (error) {
+        return null; // Si no es válido, retorna null
+    }
+};
+
+const verificarContraseña = async (userId, contraseña) => {
+    const user = await User.findById(userId); // Asegúrate de que tienes un método para buscar el usuario
+    if (!user) return false;
+
+    return bcrypt.compare(contraseña, user.contraseña); // Compara la contraseña proporcionada con la almacenada
+};
+
+const actualizarEmail = async (userId, email) => {
+    const user = await User.findByIdAndUpdate(userId, { email }, { new: true }); // Actualiza el email del usuario
+    return user;
+};
+
 const cambiarEmail = async (req, res) => {
     const { email, contraseña } = req.body;
-    const usuarioId = req.user.id; // Suponiendo que tienes el ID del usuario en el token
 
-    if (!mongoose.Types.ObjectId.isValid(usuarioId)) {
-        return res.status(400).json({ message: 'ID de usuario no válido.' });
-    }
+    const usuarioId = req.user.id; // Extrae el ID del usuario del token
 
     try {
-        // Verifica la contraseña (implementa tu lógica de verificación aquí)
-        const usuario = await Usuario.findById(usuarioId);
-        if (!usuario) {
-            return res.status(404).json({ message: 'Usuario no encontrado.' });
+        const contraseñaValida = await verificarContraseña(usuarioId, contraseña);
+
+        if (!contraseñaValida) {
+            return res.status(403).json({ message: 'Contraseña incorrecta' });
         }
 
-        // Aquí debes validar la contraseña antes de permitir el cambio de email.
-        const isPasswordValid = await usuario.comparePassword(contraseña); // Asegúrate de tener un método para comparar contraseñas.
-        if (!isPasswordValid) {
-            return res.status(401).json({ message: 'Contraseña incorrecta.' });
+        const usuarioActualizado = await actualizarEmail(usuarioId, email);
+        if (!usuarioActualizado) {
+            return res.status(400).json({ message: 'Error al cambiar el correo electrónico' });
         }
 
-        // Cambia el email
-        usuario.email = email;
-        await usuario.save();
-
-        res.status(200).json({ message: 'Correo electrónico cambiado exitosamente.' });
+        return res.status(200).json({ message: 'Correo electrónico cambiado exitosamente' });
     } catch (error) {
-        console.error('Error al modificar usuario:', error);
-        res.status(500).json({ message: 'Error al cambiar el correo electrónico.' });
+        console.error(error);
+        return res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
 
