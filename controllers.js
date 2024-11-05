@@ -368,7 +368,7 @@ const cambiarEmail = async (req, res) => {
             return res.status(400).json({ message: 'Error al cambiar el correo electrónico.' });
         }
 
-        return res.json({ 
+        return res.json({
             success: true,
             message: 'Correo electrónico cambiado exitosamente.'
         });
