@@ -6,6 +6,7 @@ const Usuario = require('./models/Usuario');
 const Review = require('./models/reviews');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 
 // Obtener el código QR
 let lastQRCode = '';
@@ -343,7 +344,7 @@ const verificarContraseña = async (userId, contraseña) => {
 // Controlador para cambiar el correo electrónico
 const cambiarEmail = async (req, res) => {
     const { email, contraseña } = req.body;
-    const usuarioId = req.user.userId;  // El ID del usuario se extrae del token
+    const usuarioId = req.user.userId;  // El ID del usuario extraído del token
 
     if (!email || !contraseña) {
         return res.status(400).json({ message: 'Faltan datos para cambiar el correo electrónico.' });
@@ -360,6 +361,11 @@ const cambiarEmail = async (req, res) => {
         const emailExistente = await Usuario.findOne({ email });
         if (emailExistente && emailExistente._id.toString() !== usuarioId) {
             return res.status(400).json({ message: 'El correo electrónico ya está en uso.' });
+        }
+
+        // Asegurarnos de que el usuarioId es un ObjectId válido
+        if (!mongoose.Types.ObjectId.isValid(usuarioId)) {
+            return res.status(400).json({ message: 'ID de usuario inválido.' });
         }
 
         // Actualizar el email del usuario
