@@ -344,7 +344,7 @@ const verificarContraseña = async (userId, contraseña) => {
 // Controlador para cambiar el correo electrónico
 const cambiarEmail = async (req, res) => {
     const { email, contraseña } = req.body;
-    const usuarioId = req.user.userId;  // El ID del usuario extraído del token
+    const usuarioId = req.params.id;  // Obtén el ID del usuario desde los parámetros de la URL
 
     if (!email || !contraseña) {
         return res.status(400).json({ message: 'Faltan datos para cambiar el correo electrónico.' });
@@ -383,7 +383,6 @@ const cambiarEmail = async (req, res) => {
         return res.status(500).json({ message: 'Error interno del servidor.' });
     }
 };
-
 ////////////////////// Reseñas //////////////////////////
 
 
