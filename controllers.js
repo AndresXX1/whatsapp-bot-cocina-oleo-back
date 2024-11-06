@@ -343,7 +343,7 @@ const verificarContraseña = async (userId, contraseña) => {
 // Controlador para cambiar el correo electrónico
 const cambiarEmail = async (req, res) => {
     const { email, contraseña } = req.body;
-    const usuarioId = req.user.userId; // Asegúrate de que el middleware de autenticación esté configurado
+    const usuarioId = req.user.userId;  // El ID del usuario se extrae del token
 
     if (!email || !contraseña) {
         return res.status(400).json({ message: 'Faltan datos para cambiar el correo electrónico.' });
